@@ -468,14 +468,14 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
       self::updateMsg($mcl_tmpl, 'D', "(cv.name, cvterm.name) = ($cv_name, $cvterm_name) found in cvterm");
     }
     else {
-
-       // Gets db.
+      
+      // Gets db.
       $db = MCL_CHADO_DB::getDB($db_name);
       if (!$db) {
         self::updateMsg($mcl_tmpl, 'E', "(db.name) = ($db_name) not found in db");
         return NULL;
       }
-
+      
       // Gets cv.
       $cv = MCL_CHADO_CV::getCV($cv_name);
       if (!$cv) {
@@ -891,7 +891,7 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
   }
 
   /**
-   * Linds between a descriptor and a trait.
+   * Links between a descriptor and a trait.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
    * @param MCL_CHADO_CVTERM $cv_name
@@ -902,10 +902,20 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
     if ($trait) {
 
       // Links a descriptor and a trait.
-      $type_id = MCL_CHADO_CVTERM::getCvterm('SITE_CV', 'belongs_to')->getCvtermID();
-      return $this->addLink($mcl_tmpl, 'cvterm_relationship', 'subject_id', $this->cvterm_id, 'object_id', $trait->getCvtermID(), $type_id);
+      // CarrotOmics change. if 'belongs_to' is not defined, code hangs here because 
+      // we try to do a NULL->getCvtermID(). modify the code to fail with an error message
+      $cvterm = MCL_CHADO_CVTERM::getCvterm('SITE_CV', 'belongs_to');
+      if ($cvterm) {
+        $type_id = $cvterm->getCvtermID();
+        return $this->addLink($mcl_tmpl, 'cvterm_relationship', 'subject_id', $this->cvterm_id, 'object_id', $trait->getCvtermID(), $type_id);
+      }
+      else {
+        drupal_set_message("Error : cvterm \"belongs_to\" is not defined in SITE_CV");
+        mcl_print("*** ERROR cvterm \"belongs_to\" is not defined in SITE_CV", 0, 1.1);
+        throw new exception("Error : cvterm \"belongs_to\" is not defined in SITE_CV");
+      }
     }
-    return TRUE;
+    return TRUE;  // return code is not checked by caller
   }
 
   /**

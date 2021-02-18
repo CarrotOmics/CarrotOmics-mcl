@@ -40,6 +40,8 @@ class MCL_TEMPLATE_ORGANISM extends MCL_TEMPLATE {
     $headers = array(
       'genus'                         => array('req' => TRUE,  'width' => 10, 'desc' => "Genus of the organism."),
       'species'                       => array('req' => TRUE,  'width' => 10, 'desc' => "Species of the organism."),
+      'infraspecific_type'            => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'            => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'family'                        => array('req' => FALSE, 'width' => 10, 'desc' => "Family of the organism."),
       'subfamily'                     => array('req' => FALSE, 'width' => 10, 'desc' => "Subfamily of the organism."),
       'tribe'                         => array('req' => FALSE, 'width' => 10, 'desc' => "Tribe of the organism."),
@@ -121,12 +123,14 @@ class MCL_TEMPLATE_ORGANISM extends MCL_TEMPLATE {
   public function uploadDataLine($line) {
 
     // Adds an organism.
-    $organism = MCL_CHADO_ORGANISM::addOrganism($this, $line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::addOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
     if ($organism) {
 //print_r($line);
       // Adds properties.
       $organism->addProp($this, 'SITE_CV', 'family', $line['family']);
       $organism->addProp($this, 'SITE_CV', 'subfamily', $line['subfamily']);
+      $organism->addProp($this, 'SITE_CV', 'infraspecific_type', $line['infraspecific_type']);
+      $organism->addProp($this, 'SITE_CV', 'infraspecific_name', $line['infraspecific_name']);
       $organism->addProp($this, 'SITE_CV', 'tribe', $line['tribe']);
       $organism->addProp($this, 'SITE_CV', 'geographic_origin', $line['geographic_origin']);
       $organism->addProp($this, 'SITE_CV', 'genome_group', $line['genome_group']);
@@ -206,10 +210,12 @@ class MCL_TEMPLATE_ORGANISM extends MCL_TEMPLATE {
       $object_organism_id = $info['object_organism_id'];
       $genus              = $info['genus'];
       $species            = $info['species'];
+      $infraspecific_type = $info['infraspecific_type'];
+      $infraspecific_name = $info['infraspecific_name'];
       $type_id_rel        = $info['type_id_rel'];
 
       // Checks the organism.
-      $organism = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
       if ($organism) {
 
         // Adds the organism.

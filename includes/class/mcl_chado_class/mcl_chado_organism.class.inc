@@ -61,7 +61,7 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
    */
   public static function getOrganismsByCropID($crop_id) {
 
-    // Gets all orgainsm for the selected crop.
+    // Gets all organisms for the selected crop.
     $crop_organism_ids = MCL_CROP::getOrganismIDs($crop_id);
     $organism_arr = array();
     foreach ($crop_organism_ids as $organism_id) {
@@ -72,7 +72,7 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Checks the existence of orgainsm. If not, write the error messasge
+   * Checks the existence of organism. If not, write the error message
    * to the log.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
@@ -84,6 +84,8 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
    * @return boolean
    */
   public static function checkOrganism(MCL_TEMPLATE $mcl_tmpl = NULL, $genus, $species, $separator = '', $warning = FALSE) {
+    $caller = debug_backtrace()[1]['function'];
+    mcl_print("*** WARNING Calling deprecated checkOrganism $genus $species from $caller", 2, 1.1);
     $flag = TRUE;
     if ($genus xor $species) {
       self::updateMsg($mcl_tmpl, 'E', "Either of genus or species must not be an empty.");
@@ -95,9 +97,9 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
       foreach ($sps as $sp) {
         $sp = trim($sp);
 
-        // Gets the orgainsm.
-        $orgainsm = MCL_CHADO_ORGANISM::getOrganism($genus, $sp);
-        if (!$orgainsm) {
+        // Gets the organism.
+        $organism = MCL_CHADO_ORGANISM::getOrganism($genus, $sp);
+        if (!$organism) {
           if ($warning) {
             self::updateMsg($mcl_tmpl, 'W', "(genus, species) = ($genus, $sp) not found in organism");
           }
@@ -112,21 +114,70 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Checks the existence of the orgainsms in the list. Semi-colons separte
-   * orgainsms and colons separates genus and species.
+   * Checks the existence of organism including optional infraspecific nomenclature.
+   * If not, write the error message to the log.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
-   * @param string $orgainsm_list
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param string $separator
+   * @param boolean $warning
    *
    * @return boolean
    */
-  public static function checkOrganismList(MCL_TEMPLATE $mcl_tmpl = NULL, $orgainsm_list) {
+  public static function checkOrganismInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $genus, $species, $infraspecific_type = NULL, $infraspecific_name = NULL, $separator = '', $warning = FALSE) {
     $flag = TRUE;
-    if ($orgainsm_list) {
-      $orgainsms = preg_split('/;/', $orgainsm_list, -1, PREG_SPLIT_NO_EMPTY);
-      foreach ($orgainsms as $orgainsm) {
-        $tmp = explode(':', $orgainsm);
-        if (!MCL_CHADO_ORGANISM::checkOrganism($tmp[0], $tmp[1])) {
+    if ($genus xor $species) {
+      self::updateMsg($mcl_tmpl, 'E', "Either of genus or species must not be an empty.");
+      $flag = FALSE;
+    }
+    else if ($genus && $species) {
+      $gns = preg_split(self::getSepRegex($separator), $genus, -1, PREG_SPLIT_NO_EMPTY);
+      $sps = preg_split(self::getSepRegex($separator), $species, -1, PREG_SPLIT_NO_EMPTY);
+      $its = preg_split(self::getSepRegex($separator), $infraspecific_type, -1);
+      $ins = preg_split(self::getSepRegex($separator), $infraspecific_name, -1);
+      $ntaxa = max(sizeof($gns), sizeof($sps), sizeof($its), sizeof($ins));
+      // now loop over each specified organism, and if a value is not present
+      // for genus or species, use the last value seen
+      for ($i=0; $i<$ntaxa; $i++) {
+        $gn = $gns[$i] ?? $gns[sizeof($gns)-1];
+        $sp = $sps[$i] ?? $sps[sizeof($sps)-1];
+        $it = $its[$i] ?? NULL;
+        $in = $ins[$i] ?? NULL;
+        // Gets the organism.
+        $organism = MCL_CHADO_ORGANISM::getOrganismInfra($gn, $sp, $it, $in);
+        if (!$organism) {
+          if ($warning) {
+            self::updateMsg($mcl_tmpl, 'W', "(genus, species, [type, rank]) = ($gn, $sp, $it, $in) not found in organism");
+          }
+          else {
+            self::updateMsg($mcl_tmpl, 'E', "(genus, species, [type, rank]) = ($gn, $sp, $it, $in) not found in organism");
+            $flag = FALSE;
+          }
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Checks the existence of the organisms in the list. Semi-colons separate
+   * organisms and colons separate genus and species.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $organism_list
+   *
+   * @return boolean
+   */
+  public static function checkOrganismList(MCL_TEMPLATE $mcl_tmpl = NULL, $organism_list) {
+    $flag = TRUE;
+    if ($organism_list) {
+      $organisms = preg_split('/;/', $organism_list, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($organisms as $organism) {
+        $tmp = explode(':', $organism);
+        if (!MCL_CHADO_ORGANISM::checkOrganismInfra($tmp[0], $tmp[1], $tmp[2], $tmp[3])) {
           $flag = FALSE;
         }
       }
@@ -135,7 +186,7 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Checks the existence of the organisms. If not, write the error messasge
+   * Checks the existence of the organisms. If not, write the error message
    * to the log.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
@@ -169,7 +220,7 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Returns the orgainsm by genus and species.
+   * Returns the organism by genus and species.
    *
    * @param string $genus
    * @param string $species
@@ -177,6 +228,8 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
    * @return MCL_CHADO_ORGANISM
    */
   public static function getOrganism($genus, $species) {
+    $caller = debug_backtrace()[1]['function'];
+    mcl_print("*** WARNING Calling deprecated getOrganism $genus $species from $caller", 2, 1.1);
     $args = array(
       'genus'   => $genus,
       'species' => $species,
@@ -185,7 +238,42 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Adds a orgainsm.
+   * Returns the organism by genus and species and optional infraspecific taxonomy
+   *
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   *
+   * @return MCL_CHADO_ORGANISM
+   */
+  public static function getOrganismInfra($genus, $species, $infraspecific_type = 'no_rank', $infraspecific_name = NULL) {
+    // handle the optional infraspecific nomenclature
+    $cvterm_id = NULL;
+
+    // CarrotOmics specifies that $infraspecific_type should not be null, force a value here
+    if (!$infraspecific_type) { $infraspecific_type = 'no_rank'; }
+
+    if ( $infraspecific_type ) {
+      $cvterm = MCL_CHADO_CVTERM::getCvterm('taxonomic_rank', $infraspecific_type);
+      if (!$cvterm) {
+        self::updateMsg($mcl_tmpl, 'E', "Error : No cvterm is defined for \"$infraspecific_type\" in cv taxonomic_rank");
+        mcl_print("*** ERROR no cvterm is defined for \"$infraspecific_type\" in cv taxonomic_rank", 2, 1.1);
+        throw new exception("Error : no cvterm is defined for \"$infraspecific_type\" in cv taxonomic_rank");
+      }
+      $cvterm_id = $cvterm->getCvtermID();
+    }
+    $args = array(
+      'genus'   => $genus,
+      'species' => $species,
+      'type_id' => $cvterm_id,
+      'infraspecific_name' => $infraspecific_name,
+    );
+    return MCL_CHADO_ORGANISM::byKey($args);
+  }
+
+  /**
+   * Adds an organism.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
    * @param string $genus
@@ -207,25 +295,74 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
     }
 
     // Checks for duplication.
-    $orgainsm = MCL_CHADO_ORGANISM::byKey($args);
-    if ($orgainsm) {
-      self::addMsg($mcl_tmpl, 'D', 'orgainsm', $args);
+    $organism = MCL_CHADO_ORGANISM::byKey($args);
+    if ($organism) {
+      self::addMsg($mcl_tmpl, 'D', 'organism', $args);
     }
     else {
 
-      // Adds a new orgainsm.
+      // Adds a new organism.
       $args['type_id']      = $type_id;
       $args['description']  = $description;
-      $orgainsm = new MCL_CHADO_ORGANISM($args);
-      if ($orgainsm->insert()) {
-        self::addMsg($mcl_tmpl, 'N', 'orgainsm', $args);
+      $organism = new MCL_CHADO_ORGANISM($args);
+      if ($organism->insert()) {
+        self::addMsg($mcl_tmpl, 'N', 'organism', $args);
       }
       else {
-        self::addMsg($mcl_tmpl, 'E', 'orgainsm', $args);
+        self::addMsg($mcl_tmpl, 'E', 'organism', $args);
         return NULL;
       }
     }
-    return $orgainsm;
+    return $organism;
+  }
+
+  /**
+   * Adds an organism.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   *
+   * @return MCL_CHADO_ORGANISM
+   */
+  public static function addOrganismInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $genus, $species, $infraspecific_type = NULL, $infraspecific_name = NULL) {
+
+    // Sets the arguments.
+    $cvterm_id = CHADO_CVTERM::getCvtermID($infraspecific_type);
+    $args = array(
+      'genus'   => $genus,
+      'species' => $species,
+      'type_id' => $cvterm_id,
+      'infraspecific_name' => $infraspecific_name,
+    );
+
+    // Checks the arguments.
+    if (!self::checkReqArgs($args)) {
+      return NULL;
+    }
+
+    // Checks for duplication.
+    $organism = MCL_CHADO_ORGANISM::byKey($args);
+    if ($organism) {
+      self::addMsg($mcl_tmpl, 'D', 'organism', $args);
+    }
+    else {
+
+      // Adds a new organism.
+      $args['type_id']      = $type_id;
+      $args['description']  = $description;
+      $organism = new MCL_CHADO_ORGANISM($args);
+      if ($organism->insert()) {
+        self::addMsg($mcl_tmpl, 'N', 'organism', $args);
+      }
+      else {
+        self::addMsg($mcl_tmpl, 'E', 'organism', $args);
+        return NULL;
+      }
+    }
+    return $organism;
   }
 
   /**
@@ -328,7 +465,7 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
   }
 
   /**
-   * Adds the related organisms in the list. Semi-colons separte orgainsms and
+   * Adds the related organisms in the list. Semi-colons separate organisms and
    * colons separates genus and species.
    *
    * @param MCL_TEMPLATE $mcl_tmpl
@@ -339,9 +476,9 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
    */
   public function addRelatedOrganismsInList(MCL_TEMPLATE $mcl_tmpl = NULL, $organism_list, $type_id_relationship) {
     if ($organism_list) {
-      $orgainsms = preg_split('/;/', $organism_list, -1, PREG_SPLIT_NO_EMPTY);
-      foreach ($orgainsms as $orgainsm) {
-        $tmp = explode(':', $orgainsm);
+      $organisms = preg_split('/;/', $organism_list, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($organisms as $organism) {
+        $tmp = explode(':', $organism);
         $genus    = trim($tmp[0]);
         $species  = trim($tmp[1]);
         $org = MCL_CHADO_ORGANISM::getOrganism($genus, $species);

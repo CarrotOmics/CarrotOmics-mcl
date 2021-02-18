@@ -154,16 +154,19 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
       }
 
       // If '::' found in uniquename, update uniquename and organism_id.
-      if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-        $genus          = trim($matches[1]);
-        $species        = trim($matches[2]);
-        $uniquename     = trim($matches[3]);
-        $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+        $uniquename         = trim($matches[2]);
+        $parts = preg_split("/\s+/", trim($matches[1]));
+        $genus              = $parts[0];
+        $species            = $parts[1];
+        $infraspecific_type = $parts[2];
+        $infraspecific_name = $parts[3];
+        $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
         if ($diff_organism) {
           $args['organism_id'] = $diff_organism->getOrganismID();
         }
         else {
-          self::updateMsg($mcl_tmpl, 'E', "$genus $species not found in organism");
+          self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
           $flag = FALSE;
         }
       }
@@ -172,6 +175,97 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
       $num = MCL_CHADO_FEATURE::countFeature($mcl_tmpl, $uniquename, $genus, $species, $type_id);
       if ($num > 1) {
         self::updateMsg($mcl_tmpl, 'E', "The uniquename '$uniquename' is ambiguous. Please not use this uniquename");
+        $flag = FALSE;
+      }
+      else if ($num < 1) {
+        $feature_type = $type->getName();
+        if ($warning) {
+          self::updateMsg($mcl_tmpl, 'W', "The uniquename '$uniquename'  ($feature_type) does not exist in chado.feature");
+        }
+        else {
+          self::updateMsg($mcl_tmpl, 'E', "The uniquename '$uniquename'  ($feature_type) does not exist in chado.feature");
+          $flag = FALSE;
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Checks the existence of feature. If not, write the error messasge
+   * to the log.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $feature
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param integer $type_id
+   * @param string $separator
+   * @param boolean $warning
+   *
+   * @return boolean
+   */
+  public static function checkFeatureInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $feature, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id, $separator = '', $warning = FALSE) {
+    $flag = TRUE;
+
+    // Gets the type.
+    $type = MCL_CHADO_CVTERM::byID($type_id);
+    if (!$type) {
+      self::updateMsg($mcl_tmpl, 'E', "$type_id not found in cvterm");
+      return FALSE;
+    }
+
+    // Checks the organism_id.
+    $organism_id = '';
+    if ($genus && $species) {
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+      if ($organism) {
+        $organism_id  = $organism->getOrganismID();
+      }
+      else {
+        self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+        return FALSE;
+      }
+    }
+
+    // Gets the uniquenames.
+    $uniquenames = preg_split(self::getSepRegex($separator), $feature, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($uniquenames as $uniquename) {
+      $uniquename = trim($uniquename);
+
+      // Sets the arguments.
+      $args = array(
+        'uniquename'  => $uniquename,
+        'type_id'     => $type_id,
+      );
+      if ($organism_id) {
+        $args['organism_id'] = $organism_id;
+      }
+
+      // If '::' found in uniquename, update uniquename and organism_id.
+      if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+        $uniquename         = trim($matches[2]);
+        $parts = preg_split("/\s+/", trim($matches[1]));
+        $genus              = $parts[0];
+        $species            = $parts[1];
+        $infraspecific_type = $parts[2];
+        $infraspecific_name = $parts[3];
+        $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+        if ($diff_organism) {
+          $args['organism_id'] = $diff_organism->getOrganismID();
+        }
+        else {
+          self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+          $flag = FALSE;
+        }
+      }
+
+      // Checks the feature.
+      $num = MCL_CHADO_FEATURE::countFeatureInfra($mcl_tmpl, $uniquename, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id);
+      if ($num > 1) {
+        self::updateMsg($mcl_tmpl, 'E', "The uniquename '$uniquename' is ambiguous. Please do not use this uniquename");
         $flag = FALSE;
       }
       else if ($num < 1) {
@@ -233,6 +327,52 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
   }
 
   /**
+   * Count the number of the feature with the same uniquename, type_id and/or
+   * organism_id
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $uniquename
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param integer $type_id
+   */
+  public static function countFeatureInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $uniquename, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id) {
+
+    // Checks the organism_id.
+    $organism_id = '';
+    if ($genus && $species) {
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+      if ($organism) {
+        $organism_id  = $organism->getOrganismID();
+      }
+      else {
+        self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+        return 0;
+      }
+    }
+
+    // Sets the arguments.
+    $args = array(
+      'uniquename'  => $uniquename,
+      'type_id'     => $type_id,
+    );
+
+    // Searches for alias.
+    $sql = "
+      SELECT COUNT(F.feature_id)
+      FROM {chado.feature} F
+      WHERE LOWER(F.uniquename) = LOWER(:uniquename) AND F.type_id = :type_id
+    ";
+    if ($organism_id) {
+      $args['organism_id'] = $organism_id;
+      $sql .= " AND F.organism_id = :organism_id";
+    }
+    return db_query($sql, $args)->fetchField();
+  }
+
+  /**
    * Checks the feature uniquename for uniqueness for the provided type. Search for the
    * same uniquename with different organism. Log the error if the uniquename
    * is used with different organism.
@@ -250,6 +390,57 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
 
       // Gets the organism.
       $organism = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      if ($organism) {
+
+        // Gets all the features with the same uniquename.
+        $sql = "
+          SELECT F.* FROM {chado.feature} F
+          WHERE LOWER(F.uniquename) = LOWER(:uniquename) AND F.type_id = :type_id
+        ";
+        $args =  array(
+          ':uniquename' => $uniquename,
+          ':type_id'    => $type_id,
+        );
+        $results = db_query($sql,$args);
+        $found = FALSE;
+        $count = 0;
+        while ($feature = $results->fetchObject()) {
+          $count++;
+
+          // Checks for organism_id.
+          if ($feature->organism_id == $organism->getOrganismID()) {
+            $found = TRUE;
+          }
+        }
+        if ($count && !$found) {
+          self::updateMsg($mcl_tmpl, 'E', "$uniquename is used with different organism. Please change the name.");
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
+  }
+
+  /**
+   * Checks the feature uniquename for uniqueness for the provided type. Search for the
+   * same uniquename with different organism. Log the error if the uniquename
+   * is used with different organism.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $uniquename
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param integer $type_id
+   *
+   * @return boolean
+   */
+  public static function checkFeatureUniquenameForUniquenessInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $uniquename, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id) {
+    if ($uniquename) {
+
+      // Gets the organism.
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
       if ($organism) {
 
         // Gets all the features with the same uniquename.
@@ -325,16 +516,19 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
       }
 
       // If '::' found in uniquename, update uniquename and organism_id.
-      if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-        $genus          = trim($matches[1]);
-        $species        = trim($matches[2]);
-        $uniquename     = trim($matches[3]);
-        $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+        $uniquename         = trim($matches[2]);
+        $parts = preg_split("/\s+/", trim($matches[1]));
+        $genus              = $parts[0];
+        $species            = $parts[1];
+        $infraspecific_type = $parts[2];
+        $infraspecific_name = $parts[3];
+        $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
         if ($diff_organism) {
           $args['organism_id'] = $diff_organism->getOrganismID();
         }
         else {
-          self::updateMsg($mcl_tmpl, 'E', "$genus $species not found in organism");
+          self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
           $flag = FALSE;
         }
       }
@@ -694,6 +888,42 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
   }
 
   /**
+   * Returns the feature by uniquename, genus, species, optional infraspecific nomenclature, and type_id.
+   *
+   * @param string $uniquename
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param integer $type_id
+   *
+   * @return MCL_CHADO_FEATURE
+   */
+  public static function getFeatureInfra($uniquename, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id) {
+    // Gets the organism_id.
+    $organism_id = '';
+    if ($genus && $species) {
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+      if ($organism) {
+        $organism_id = $organism->getOrganismID();
+      }
+      else {
+       return NULL;
+      }
+    }
+
+    // Gets the feature.
+    $args = array(
+      'uniquename'  => $uniquename,
+      'type_id'     => $type_id,
+    );
+    if ($organism_id) {
+      $args['organism_id'] = $organism_id;
+    }
+    return MCL_CHADO_FEATURE::byKey($args);
+  }
+
+  /**
    * Returns the type of the feature.
    *
    * @return string
@@ -996,13 +1226,16 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
         if ($use_organism_id) {
           $organism_id = $this->organism_id;
 
-           // If '::' found in uniquename, update uniquename and organism_id.
-          if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-            $genus          = trim($matches[1]);
-            $species        = trim($matches[2]);
-            $uniquename     = trim($matches[3]);
-            $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
-            $organism_id    = $diff_organism->getOrganismID();
+          // If '::' found in uniquename, update uniquename and organism_id.
+          if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+            $uniquename         = trim($matches[2]);
+            $parts = preg_split("/\s+/", trim($matches[1]));
+            $genus              = $parts[0];
+            $species            = $parts[1];
+            $infraspecific_type = $parts[2];
+            $infraspecific_name = $parts[3];
+            $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+            $organism_id = $diff_organism->getOrganismID();
           }
           $args['organism_id'] = $organism_id;
         }
@@ -1472,12 +1705,73 @@ class MCL_CHADO_FEATURE extends CHADO_FEATURE {
           $organism_id  = $organism->getOrganismID();
 
           // If '::' found in uniquename, update uniquename and organism_id.
-          if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-            $genus          = trim($matches[1]);
-            $species        = trim($matches[2]);
-            $uniquename     = trim($matches[3]);
-            $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
-            $organism_id    = $diff_organism->getOrganismID();
+          if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+            $uniquename         = trim($matches[2]);
+            $parts = preg_split("/\s+/", trim($matches[1]));
+            $genus              = $parts[0];
+            $species            = $parts[1];
+            $infraspecific_type = $parts[2];
+            $infraspecific_name = $parts[3];
+            $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+            $organism_id = $diff_organism->getOrganismID();
+          }
+
+          // Adds a stock.
+          $stock = MCL_CHADO_STOCK::byKey(array('uniquename' => $uniquename, 'organism_id' => $organism_id));
+          if ($mcl_stock) {
+            if (!$this->addLink($mcl_tmpl, 'feature_stock', 'feature_id', $this->feature_id, 'stock_id', $stock->getStockID(), $type_id)) {
+              $flag = FALSE;
+            }
+          }
+          else {
+            $flag = FALSE;
+          }
+        }
+      }
+      else {
+        $this->updateMsg('E', "(genus, species) = ($genus, $species) not found in organism");
+        $flag = FALSE;
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Adds a stock to feature_stock.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $stock
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addStockInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $stock, $genus, $species, $infraspecific_type, $infraspecific_name, $type_id, $separator = '') {
+    $flag = TRUE;
+    if ($stock) {
+
+      // Gets organism_id.
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+      if ($organism) {
+
+        $uniquenames = preg_split($this->getSepRegex($separator), $stock, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($uniquenames as $uniquename) {
+          $uniquename   = trim($uniquename);
+          $organism_id  = $organism->getOrganismID();
+
+          // If '::' found in uniquename, update uniquename and organism_id.
+          if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+            $uniquename         = trim($matches[2]);
+            $parts = preg_split("/\s+/", trim($matches[1]));
+            $genus              = $parts[0];
+            $species            = $parts[1];
+            $infraspecific_type = $parts[2];
+            $infraspecific_name = $parts[3];
+            $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+            $organism_id = $diff_organism->getOrganismID();
           }
 
           // Adds a stock.

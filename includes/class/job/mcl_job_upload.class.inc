@@ -729,7 +729,7 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
     $writer = PHPExcel_IOFactory::createWriter($excel, 'CSV');
     $dup_templates = array();
     for ($i = 0; $i < $num_sheets; $i++) {
-      $this->setProgress("Copying a worksheet... [$i of $num_sheets worksheets]");
+      $this->setProgress("Copying a worksheet... [".($i+1)." of $num_sheets worksheets]");
       $excel->setActiveSheetIndex($i);
       $template = strtolower($excel->getActiveSheet()->getTitle());
       print "\tcopying $template\n\n";

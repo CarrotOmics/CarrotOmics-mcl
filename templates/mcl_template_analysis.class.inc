@@ -46,6 +46,7 @@ class MCL_TEMPLATE_ANALYSIS extends MCL_TEMPLATE {
       'source_name'     => array('req' => FALSE, 'width' => 10, 'desc' => "Source name, e.g. cDNA, SwissProt (Maxium 255 charactrers)."),
       'source_version'  => array('req' => FALSE, 'width' => 10, 'desc' => "Source version (Maxium 255 charactrers)."),
       'description'     => array('req' => FALSE, 'width' => 10, 'desc' => "The description of the analysis."),
+      'timeexecuted'    => array('req' => FALSE, 'width' => 10, 'desc' => "Time of analysis execution. Use the format yyyy-mm-dd hh-mm-ss e.g. \"2001-02-03 04:05:06\". Leave blank to use the time when the data are uploaded."),
     );
     return $headers;
   }
@@ -70,6 +71,7 @@ class MCL_TEMPLATE_ANALYSIS extends MCL_TEMPLATE {
     $this->checkLength(255, 'algorithm', $line['algorithm']);
     $this->checkLength(255, 'source_name', $line['source_name']);
     $this->checkLength(255, 'source_version', $line['source_version']);
+    $this->checkLength(32,  'timeexecuted', $line['timeexecuted']);
   }
 
   /**
@@ -86,6 +88,7 @@ class MCL_TEMPLATE_ANALYSIS extends MCL_TEMPLATE {
       'sourcename'      => $line['source_name'],
       'sourceversion'   => $line['source_version'],
       'description'     => $line['description'],
+      'timeexecuted'    => $line['timeexecuted'],
     );
     MCL_CHADO_ANALYSIS::addAnalysis($this, $details);
   }

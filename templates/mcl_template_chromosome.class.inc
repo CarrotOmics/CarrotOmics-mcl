@@ -39,10 +39,12 @@ class MCL_TEMPLATE_CHROMOSOME extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'genome'      => array('req' => TRUE, 'width' => 10, 'desc' => "Name of the genome. It should match a 'name' column entry in the 'Analysis' sheet."),
-      'chromosome'  => array('req' => TRUE, 'width' => 10, 'desc' => "Name of the chromosome."),
-      'genus'       => array('req' => TRUE, 'width' => 10, 'desc' => "Genus of the chromosome"),
-      'species'     => array('req' => TRUE, 'width' => 10, 'desc' => "Species of the chromosome"),
+      'genome'             => array('req' => TRUE, 'width' => 10, 'desc' => "Name of the genome. It should match a 'name' column entry in the 'Analysis' sheet."),
+      'chromosome'         => array('req' => TRUE, 'width' => 10, 'desc' => "Name of the chromosome."),
+      'genus'              => array('req' => TRUE, 'width' => 10, 'desc' => "Genus of the chromosome"),
+      'species'            => array('req' => TRUE, 'width' => 10, 'desc' => "Species of the chromosome"),
+      'infraspecific_type' => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name' => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
     );
     return $headers;
   }
@@ -65,7 +67,7 @@ class MCL_TEMPLATE_CHROMOSOME extends MCL_TEMPLATE {
     MCL_CHADO_ANALYSIS::checkAnalysis($this, $line['genome']);
 
     // Checks organism.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
   }
 
   /**
@@ -77,7 +79,7 @@ class MCL_TEMPLATE_CHROMOSOME extends MCL_TEMPLATE {
     $genome = MCL_CHADO_ANALYSIS::byName($line['genome']);
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Adds a chromosome.
     $chromosome = MCL_CHADO_FEATURE::addFeature($this, $line['chromosome'], $line['chromosome'], $this->cvterms['sequence']['chromosome'], $organism->getOrganismID());

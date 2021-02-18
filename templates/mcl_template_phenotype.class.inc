@@ -43,6 +43,8 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
       'stock_name'        => array('req' => TRUE,  'width' => 10, 'desc' => "ID of the stock that has been phenotyped. It should match a 'stock_name' column entry in the 'Stock' sheet or 'progeny_name' column entry 'Progeny' sheet."),
       'genus'             => array('req' => TRUE,  'width' => 10, 'desc' => "Genus of the stock"),
       'species'           => array('req' => TRUE,  'width' => 10, 'desc' => "Species of the stock"),
+      'infraspecific_type' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'sample_id'         => array('req' => TRUE,  'width' => 10, 'desc' => "The ID of the smallest sample or sub-sample that was tested (Each row should have unique sample_ID). If there is no unique sample ID, users can concatenate a set of columns that gives a unique phenotypic value and those columns become required fields. For example, if a combination of dataset_name, ID, phenotyping_date is unique for the specific phenotype, those three can be concatenated with '_' in between."),
       'clone_id'          => array('req' => FALSE, 'width' => 10, 'desc' => "ID of a spefic clone if available (eg. individual tree)."),
       'primary_order'     => array('req' => FALSE, 'width' => 10, 'desc' => "The primary order of a sample"),
@@ -114,13 +116,13 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     MCL_CHADO_DATASET::checkDataset($this, $line['dataset_name']);
 
     // Checks organisms.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks stock.
-    MCL_CHADO_STOCK::checkStock($this, $line['stock_name'], $line['genus'], $line['species']);
+    MCL_CHADO_STOCK::checkStockInfra($this, $line['stock_name'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks rootstock.
-    MCL_CHADO_STOCK::checkStock($this, $line['rootstock'], $line['genus'], $line['species']);
+    MCL_CHADO_STOCK::checkStockInfra($this, $line['rootstock'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks evaluator for contact.
     MCL_CHADO_CONTACT::checkContact($this, $line['evaluator'], "[,;]");
@@ -143,7 +145,7 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     }
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Gets nd_geolocation_id.
     $nd_geolocation_id = MCL_CHADO_LOCATION::getLocationIDBySite($line['site_name']);
@@ -154,7 +156,7 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
 
     // Sets unique, primary and secondary orders.
     $unique_id        = $line['sample_id'];
-    $primary_order    = (array_key_exists('primary_oder', $line) && !$line['primary_oder']) ? $line['primary_oder'] : '1';
+    $primary_order    = (array_key_exists('primary_order', $line) && !$line['primary_order']) ? $line['primary_order'] : '1';
     $secondary_order  = (array_key_exists('secondary_order', $line) && !$line['secondary_order']) ? $line['secondary_order'] : '1';
 
     // Gets the stock.
@@ -183,7 +185,7 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
       $sample->addRelatedStock($this, $stock, $this->cvterms['SITE_CV']['sample_of']);
 
       // Gets rootstock_id.
-      $rootstock = MCL_CHADO_STOCK::getStock($line['rootstock'], $line['genus'], $line['species']);
+      $rootstock = MCL_CHADO_STOCK::getStockInfra($line['rootstock'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
       $rootstock_id = '';
       if ($rootstock) {
         $rootstock_id = $rootstock->getStockID();
@@ -280,21 +282,26 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
   public function postProcessECD() {
 
     // Gets the cv.
-    $cv = MCL_CHADO_CV::getCV($this->getJob()->getParamByKey('cv'));
+    $cv_name = $this->getJob()->getParamByKey('cv');
+    if (!$cv_name) {
+      $this->updateMsg('E', "cv name not specified for this job, please add in \"Advanced Options\" e.g. \"cv::MAIN\"");
+      return FALSE;
+    }
+    $cv = MCL_CHADO_CV::getCV($cv_name);
     if (!$cv) {
-      $this->updateMsg('E', "cv does not exist.");
+      $this->updateMsg('E', "cv \"$cv_name\" does not exist for this job for the special columns.");
       return FALSE;
     }
 
     // Saves the user-specific properties.
     if (!$this->saveSpecialColumns('##', $cv->getCvID(), $this->getHeaders())) {
-      $this->updateMsg('E', "Failed to save the special columns");
+      $this->updateMsg('E', "Failed to save the ## special columns");
       return FALSE;
     }
 
     // Saves the descriptors.
     if (!$this->saveSpecialColumns('#', $cv->getCvID(), $this->getHeaders())) {
-      $this->updateMsg('E', "Failed to save the special columns");
+      $this->updateMsg('E', "Failed to save the # special columns");
       return FALSE;
     }
     return TRUE;

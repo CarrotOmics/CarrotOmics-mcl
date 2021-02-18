@@ -398,23 +398,6 @@ DESC;
             continue;
           }
 
-          // Checks the required cvterms for this template.
-          $missing_cvterm = FALSE;
-          $req_cvterms = $mcl_template->defineCvterms();
-          foreach ((array)$req_cvterms as $cv_name => $cvterm_names) {
-            foreach ((array)$cvterm_names as $cvterm_name => $num) {
-              $cvterm = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name);
-              if (!$cvterm) {
-                $missing_cvterm = TRUE;
-                drupal_set_message("$cvterm_name [$cv_name] not found");
-              }
-            }
-          }
-          if ($missing_cvterm) {
-            drupal_set_message("The required cvterms for $class_name are missing. Please add them first.");
-            continue;
-          }
-
           // Adds a new template.
           if (MCL_TEMPLATE::addTemplate($mcl_template->getTemplateType(), $template_name, 0)) {
             drupal_set_message("New template of $class_name has been added.");
@@ -987,7 +970,7 @@ DESC;
   public function runErrorCheckEntry() {
 
     // Calls preProcessECE().
-    mcl_print("- Calling preProcessECE() function", 2, 1.2);
+    mcl_print("- Calling preProcessECE() function", 2, 1.1);
     if (!$this->preProcessECE()) {
       $this->updateMsg('E', "Error at preProcessECE()");
       return FALSE;
@@ -1206,13 +1189,14 @@ DESC;
   public function runErrorCheckData() {
 
     // Calls preProcessECD().
-    mcl_print("- Calling preProcessECD() function", 2, 1.2);
+    mcl_print("- Calling preProcessECD() function", 2, 1.1);
     if (!$this->preProcessECD()) {
       $this->updateMsg('E', "Error at preProcessECD()");
       return FALSE;
     }
 
     // Calls the pre-process of merge check.
+    mcl_print("- Calling preMergeCheck() function", 2, 1.1);
     if (!$this->preMergeCheck()) {
       $this->updateMsg('E', "Error at preMergeCheck()");
       return FALSE;
@@ -1839,7 +1823,7 @@ DESC;
           $descriptors[$descriptor['cvterm_id']] = $descriptor;
         }
         else {
-          $this->updateMsg('E', "$cvterm_name not found in cvterm");
+          $this->updateMsg('E', "cvterm \"$cvterm_name\" not found in site cv \"$site_cv_name\"");
         }
       }
     }

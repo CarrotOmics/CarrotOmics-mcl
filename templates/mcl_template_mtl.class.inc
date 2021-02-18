@@ -42,6 +42,8 @@ class MCL_TEMPLATE_MTL extends MCL_TEMPLATE {
       'mtl_name'              => array('req' => TRUE,  'width' => 10, 'desc' => "Trait locus name given by curators."),
       'genus'                 => array('req' => TRUE,  'width' => 10, 'desc' => "The genus of the phenotyping material."),
       'species'               => array('req' => TRUE,  'width' => 10, 'desc' => "The species of the phenotyping material."),
+      'infraspecific_type'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'trait_name'            => array('req' => FALSE, 'width' => 10, 'desc' => "Descriptive name for trait, it should be one of the crop trait ontology and should match a term in 'Trait' sheet."),
       'trait_descriptor_set'  => array('req' => FALSE, 'width' => 10, 'desc' => "Name of the crop trait ontology. A site-wide crop trait ontology can be specified in the loader. If not provided, the site trait ontology will be used."),
       'gb_id'                 => array('req' => FALSE, 'width' => 10, 'desc' => "Associated genbank ID if available."),
@@ -86,10 +88,10 @@ class MCL_TEMPLATE_MTL extends MCL_TEMPLATE {
   public function runErrorCheckDataLine($line) {
 
     // Checks DB for DB:genbank.
-    MCL_CHADO_DB::checkDB($this, 'DB:genbank');
+    MCL_CHADO_DB::checkDB($this, 'genbank');
 
     // Checks organism.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks trait.
     MCL_CHADO_TRAIT::checkTrait($this, $line['trait_name'], $line['trait_descriptor_set']);
@@ -113,7 +115,7 @@ class MCL_TEMPLATE_MTL extends MCL_TEMPLATE {
   public function uploadDataLine($line) {
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Adds a MTL.
     $mtl = MCL_CHADO_FEATURE::addFeature($this, $line['mtl_name'], $line['trait_name'], $this->cvterms['sequence']['heritable_phenotypic_marker'], $organism->getOrganismID());
@@ -135,7 +137,7 @@ class MCL_TEMPLATE_MTL extends MCL_TEMPLATE {
       $mtl->addRelatedFeatures($this, $line['neighboring_marker'], $this->cvterms['sequence']['genetic_marker'], FALSE, $this->cvterms['relationship']['adjacent_to'], "[,;]", TRUE);
 
       // Adds the dbxref.
-      $db = MCL_CHADO_DB::getDB('DB:genbank');
+      $db = MCL_CHADO_DB::getDB('genbank');
       $mtl->addDBXref($this, $db->getDbID(), $line['gb_id'], "[,;]");
 
       /// Adds the trait.

@@ -8965,7 +8965,10 @@ CREATE TABLE nd_geolocation (
     latitude real,
     longitude real,
     geodetic_datum character varying(32),
-    altitude real
+    altitude real,
+    latitude_dev real,
+    longitude_dev real,
+    altitude_dev real
 );
 
 
@@ -9009,6 +9012,27 @@ COMMENT ON COLUMN nd_geolocation.geodetic_datum IS 'The geodetic system on which
 --
 
 COMMENT ON COLUMN nd_geolocation.altitude IS 'The altitude (elevation) of the location in meters. If the altitude is only known as a range, this is the average, and altitude_dev will hold half of the width of the range.';
+
+
+--
+-- Name: COLUMN nd_geolocation.latitude_dev; Type: COMMENT; Schema: chado; Owner: -
+--
+
+COMMENT ON COLUMN nd_geolocation.latitude_dev IS 'The uncertainty of the latitude value, half of the width of the range of possible values.';
+
+
+--
+-- Name: COLUMN nd_geolocation.longitude_dev; Type: COMMENT; Schema: chado; Owner: -
+--
+
+COMMENT ON COLUMN nd_geolocation.longitude_dev IS 'The uncertainty of the longitude value, half of the width of the range of possible values.';
+
+
+--
+-- Name: COLUMN nd_geolocation.altitude_dev; Type: COMMENT; Schema: chado; Owner: -
+--
+
+COMMENT ON COLUMN nd_geolocation.altitude_dev IS 'The uncertainty of the altitude value, half of the width of the range of possible values.';
 
 
 --

@@ -19,6 +19,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   protected $longitude         = NULL;
   protected $geodetic_datum    = NULL;
   protected $altitude          = NULL;
+  protected $latitude_dev      = NULL;
+  protected $longitude_dev     = NULL;
+  protected $altitude_dev      = NULL;
 
   /**
    *  Data types for the data members.
@@ -30,6 +33,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
     'longitude'         => 'real',
     'geodetic_datum'    => 'character_varying(32)',
     'altitude'          => 'real',
+    'latitude_dev'      => 'real',
+    'longitude_dev'     => 'real',
+    'altitude_dev'      => 'real',
   );
 
   /**
@@ -42,6 +48,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
     'longitude'         => FALSE,
     'geodetic_datum'    => FALSE,
     'altitude'          => FALSE,
+    'latitude_dev'      => FALSE,
+    'longitude_dev'     => FALSE,
+    'altitude_dev'      => FALSE,
   );
 
   /**
@@ -58,6 +67,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
     $this->longitude         = array_key_exists('longitude', $details)         ? $details['longitude']         : '';
     $this->geodetic_datum    = array_key_exists('geodetic_datum', $details)    ? $details['geodetic_datum']    : '';
     $this->altitude          = array_key_exists('altitude', $details)          ? $details['altitude']          : '';
+    $this->latitude_dev      = array_key_exists('latitude_dev', $details)      ? $details['latitude_dev']      : '';
+    $this->longitude_dev     = array_key_exists('longitude_dev', $details)     ? $details['longitude_dev']     : '';
+    $this->altitude_dev      = array_key_exists('altitude_dev', $details)      ? $details['altitude_dev']      : '';
   }
 
   /**
@@ -174,6 +186,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
         if (is_numeric($this->latitude))  { $fields['latitude']  = $this->latitude; }
         if (is_numeric($this->longitude)) { $fields['longitude'] = $this->longitude; }
         if (is_numeric($this->altitude))  { $fields['altitude']  = $this->altitude; }
+        if (is_numeric($this->latitude_dev))  { $fields['latitude_dev']  = $this->latitude_dev; }
+        if (is_numeric($this->longitude_dev)) { $fields['longitude_dev'] = $this->longitude_dev; }
+        if (is_numeric($this->altitude_dev))  { $fields['altitude_dev']  = $this->altitude_dev; }
 
         // Inserts the record.
         $this->nd_geolocation_id = db_insert('chado.nd_geolocation')
@@ -205,6 +220,9 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
       if (is_numeric($this->latitude))  { $fields['latitude']  = $this->latitude; }
       if (is_numeric($this->longitude)) { $fields['longitude'] = $this->longitude; }
       if (is_numeric($this->altitude))  { $fields['altitude']  = $this->altitude; }
+      if (is_numeric($this->latitude_dev))  { $fields['latitude_dev']  = $this->latitude_dev; }
+      if (is_numeric($this->longitude_dev)) { $fields['longitude_dev'] = $this->longitude_dev; }
+      if (is_numeric($this->altitude_dev))  { $fields['altitude_dev']  = $this->altitude_dev; }
 
       // Updates the record.
       db_update('chado.nd_geolocation')
@@ -246,7 +264,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the data type of the member.
    *
-   * @retrun various
+   * @return various
    */
   public function getDataType($member) {
     if (is_array(self::$data_types) && array_key_exists($member, self::$data_types)) {
@@ -257,7 +275,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the 'NOT NULL' of the member.
    *
-   * @retrun various
+   * @return various
    */
   public function isNotNull($member) {
     if (is_array(self::$not_nulls) && array_key_exists($member, self::$not_nulls)) {
@@ -272,7 +290,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the data member array.
    *
-   * @retrun array
+   * @return array
    */
   public function getMemberArr() {
     return $this->member_arr;
@@ -290,7 +308,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the nd_geolocation_id.
    *
-   * @retrun serial
+   * @return serial
    */
   public function getNdGeolocationID() {
     return $this->nd_geolocation_id;
@@ -308,7 +326,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the description.
    *
-   * @retrun character_varying(255)
+   * @return character_varying(255)
    */
   public function getDescription() {
     return $this->description;
@@ -326,7 +344,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the latitude.
    *
-   * @retrun real
+   * @return real
    */
   public function getLatitude() {
     return $this->latitude;
@@ -344,7 +362,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the longitude.
    *
-   * @retrun real
+   * @return real
    */
   public function getLongitude() {
     return $this->longitude;
@@ -362,7 +380,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the geodetic_datum.
    *
-   * @retrun character_varying(32)
+   * @return character_varying(32)
    */
   public function getGeodeticDatum() {
     return $this->geodetic_datum;
@@ -380,7 +398,7 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   /**
    * Retrieves the altitude.
    *
-   * @retrun real
+   * @return real
    */
   public function getAltitude() {
     return $this->altitude;
@@ -394,4 +412,59 @@ class CHADO_ND_GEOLOCATION  extends CHADO_TABLE {
   public function setAltitude($altitude) {
     $this->altitude = $altitude;
   }
+
+  /**
+   * Retrieves the latitude_dev.
+   *
+   * @return real
+   */
+  public function getLatitude_dev() {
+    return $this->latitude_dev;
+  }
+
+  /**
+   * Sets the latitude_dev.
+   *
+   * @param real $latitude_dev
+   */
+  public function setLatitude_dev($latitude_dev) {
+    $this->latitude_dev = $latitude_dev;
+  }
+
+  /**
+   * Retrieves the longitude_dev.
+   *
+   * @return real
+   */
+  public function getLongitude_dev() {
+    return $this->longitude_dev;
+  }
+
+  /**
+   * Sets the longitude_dev.
+   *
+   * @param real $longitude_dev
+   */
+  public function setLongitude_dev($longitude_dev) {
+    $this->longitude_dev = $longitude_dev;
+  }
+
+  /**
+   * Retrieves the altitude_dev.
+   *
+   * @return real
+   */
+  public function getAltitude_dev() {
+    return $this->altitude_dev;
+  }
+
+  /**
+   * Sets the altitude_dev.
+   *
+   * @param real $altitude_dev
+   */
+  public function setAltitude_dev($altitude_dev) {
+    $this->altitude_dev = $altitude_dev;
+  }
+
 }

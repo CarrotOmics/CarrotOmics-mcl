@@ -44,6 +44,8 @@ class MCL_TEMPLATE_QTL extends MCL_TEMPLATE {
       'published_symbol'            => array('req' => FALSE, 'width' => 10, 'desc' => "Published Symbol for the QTL."),
       'genus'                       => array('req' => TRUE,  'width' => 10, 'desc' => "The genus of the phenotyping material."),
       'species'                     => array('req' => TRUE,  'width' => 10, 'desc' => "The species of the phenotyping material."),
+      'infraspecific_type'          => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'          => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'trait_name'                  => array('req' => TRUE,  'width' => 10, 'desc' => "Descriptive name for trait, it should be one of the crop trait ontology and should match a term in 'Trait' sheet."),
       'trait_descriptor_set'        => array('req' => FALSE, 'width' => 10, 'desc' => "Name of the crop trait ontology (entered by the curator who loads the data into the database). If not provided, the site trait ontology will be used."),
       'site_name'                   => array('req' => FALSE, 'width' => 10, 'desc' => "It should match 'site_name' in the 'Site' sheet."),
@@ -115,7 +117,7 @@ class MCL_TEMPLATE_QTL extends MCL_TEMPLATE {
     MCL_CHADO_DATASET::checkDataset($this, $line['dataset_name']);
 
     // Checks organism.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks trait.
     MCL_CHADO_TRAIT::checkTrait($this, $line['trait_name'], $line['trait_descriptor_set']);
@@ -139,12 +141,11 @@ class MCL_TEMPLATE_QTL extends MCL_TEMPLATE {
   public function uploadDataLine($line) {
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Adds or gets QTL.
     $qtl = MCL_CHADO_FEATURE::addFeature($this, $line['qtl_label'], $line['trait_name'], $this->cvterms['sequence']['qtl'], $organism->getOrganismID());
     if ($qtl) {
-
       // Adds the properties.
       $qtl->addProp($this, 'SITE_CV', 'published_symbol', $line['published_symbol']);
       $qtl->addProp($this, 'SITE_CV', 'r2', $line['r2']);
@@ -185,7 +186,7 @@ class MCL_TEMPLATE_QTL extends MCL_TEMPLATE {
       $qtl->addRelatedFeatures($this, $line['neighboring_marker'], $this->cvterms['sequence']['genetic_marker'], FALSE, $this->cvterms['relationship']['adjacent_to'], "[,;]", TRUE);
 
       // Adds the stocks.
-      $qtl->addStock($this, $line['source'], $line['genus'], $line['species'], $this->cvterms['SITE_CV']['source'], "[,;]");
+      $qtl->addStockInfra($this, $line['source'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['SITE_CV']['source'], "[,;]");
 
       // Adds the references.
       $qtl->addReference($this, $line['reference'], "[,;]");

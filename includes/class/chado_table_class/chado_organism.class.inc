@@ -12,36 +12,42 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
   /**
    *  Data members for CHADO_ORGANISM.
    */
-  protected $member_arr   = NULL;
-  protected $organism_id  = NULL;
-  protected $abbreviation = NULL;
-  protected $genus        = NULL;
-  protected $species      = NULL;
-  protected $common_name  = NULL;
-  protected $comment      = NULL;
+  protected $member_arr         = NULL;
+  protected $organism_id        = NULL;
+  protected $abbreviation       = NULL;
+  protected $genus              = NULL;
+  protected $species            = NULL;
+  protected $infraspecific_name = NULL;
+  protected $type_id            = NULL;
+  protected $common_name        = NULL;
+  protected $comment            = NULL;
 
   /**
    *  Data types for the data members.
    */
   protected static $data_types = array(
-    'organism_id'  => 'serial',
-    'abbreviation' => 'character_varying(255)',
-    'genus'        => 'character_varying(255)',
-    'species'      => 'character_varying(255)',
-    'common_name'  => 'character_varying(255)',
-    'comment'      => 'text',
+    'organism_id'        => 'serial',
+    'abbreviation'       => 'character_varying(255)',
+    'genus'              => 'character_varying(255)',
+    'species'            => 'character_varying(255)',
+    'infraspecific_name' => 'character_varying(255)',
+    'type_id'            => 'integer',
+    'common_name'        => 'character_varying(255)',
+    'comment'            => 'text',
   );
 
   /**
    *  'NOT NULL' for the data members.
    */
   protected static $not_nulls = array(
-    'organism_id'  => TRUE,
-    'abbreviation' => FALSE,
-    'genus'        => TRUE,
-    'species'      => TRUE,
-    'common_name'  => FALSE,
-    'comment'      => FALSE,
+    'organism_id'        => TRUE,
+    'abbreviation'       => FALSE,
+    'genus'              => TRUE,
+    'species'            => TRUE,
+    'infraspecific_name' => FALSE,
+    'type_id'            => FALSE,
+    'common_name'        => FALSE,
+    'comment'            => FALSE,
   );
 
   /**
@@ -51,13 +57,15 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
    */
   public function __construct($details = array()) {
     // Initializes data members.
-    $this->member_arr   = $details;
-    $this->organism_id  = array_key_exists('organism_id', $details)  ? $details['organism_id']  : '';
-    $this->abbreviation = array_key_exists('abbreviation', $details) ? $details['abbreviation'] : '';
-    $this->genus        = array_key_exists('genus', $details)        ? $details['genus']        : '';
-    $this->species      = array_key_exists('species', $details)      ? $details['species']      : '';
-    $this->common_name  = array_key_exists('common_name', $details)  ? $details['common_name']  : '';
-    $this->comment      = array_key_exists('comment', $details)      ? $details['comment']      : '';
+    $this->member_arr         = $details;
+    $this->organism_id        = array_key_exists('organism_id', $details)  ? $details['organism_id']  : '';
+    $this->abbreviation       = array_key_exists('abbreviation', $details) ? $details['abbreviation'] : '';
+    $this->genus              = array_key_exists('genus', $details)        ? $details['genus']        : '';
+    $this->species            = array_key_exists('species', $details)      ? $details['species']      : '';
+    $this->infraspecific_name = array_key_exists('infraspecific_name', $details) ? $details['infraspecific_name'] : '';
+    $this->type_id            = array_key_exists('type_id', $details)      ? $details['type_id']      : '';
+    $this->common_name        = array_key_exists('common_name', $details)  ? $details['common_name']  : '';
+    $this->comment            = array_key_exists('comment', $details)      ? $details['comment']      : '';
   }
 
   /**
@@ -98,14 +106,17 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
         }
       }
 
-      // Adds LOWER() function to the characters.
-      if (preg_match("/^(char|text)/", $data_type)) {
-        $where_arr []= " LOWER($key) = LOWER(:$key) ";
+      // infraspecific_name is optional so exclude from WHERE if not used
+      if (($key != 'infraspecific_name') or ($value)) {
+        // Adds LOWER() function to the characters.
+        if (preg_match("/^(char|text)/", $data_type)) {
+          $where_arr []= " LOWER($key) = LOWER(:$key) ";
+        }
+        else {
+          $where_arr []= " $key = :$key ";
+        }
+        $args[":$key"] = $keys[$key];
       }
-      else {
-        $where_arr []= " $key = :$key ";
-      }
-      $args[":$key"] = $keys[$key];
     }
 
     // Gets the table properties.
@@ -114,6 +125,7 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
     if ($details) {
       return new self($details);
     }
+    mcl_print("WARNING: CHADO_ORGANISM::byKey sql query returning NULL from $sql", 2, 1.1); // CarrotOmics addition
     return NULL;
   }
 
@@ -136,7 +148,7 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
    */
   public static function getUK() {
     return array(
-      'organism_c1' => array('genus','species'),
+      'organism_c1' => array('genus','species','type_id','infraspecific_name'),
     );
   }
 
@@ -150,6 +162,7 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
         array('table' => 'analysis_organism', 'attr' => 'organism_id'),
         array('table' => 'biomaterial', 'attr' => 'taxon_id'),
         array('table' => 'cell_line', 'attr' => 'organism_id'),
+        array('table' => 'cvterm', 'attr' => 'type_id'),
         array('table' => 'featuremap_organism', 'attr' => 'organism_id'),
         array('table' => 'library', 'attr' => 'organism_id'),
         array('table' => 'organism_dbxref', 'attr' => 'organism_id'),
@@ -182,11 +195,13 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
         // Populates all fields. The attribute with 'NOT NULL' would be skipped
         // if the value is empty.
         $fields = array();
-        $fields['abbreviation'] = $this->abbreviation;
-        $fields['genus']        = $this->genus;
-        $fields['species']      = $this->species;
-        $fields['common_name']  = $this->common_name;
-        $fields['comment']      = $this->comment;
+        $fields['abbreviation']       = $this->abbreviation;
+        $fields['genus']              = $this->genus;
+        $fields['species']            = $this->species;
+        $fields['infraspecific_name'] = $this->infraspecific_name;
+        $fields['type_id']            = $this->type_id;
+        $fields['common_name']        = $this->common_name;
+        $fields['comment']            = $this->comment;
 
 
         // Inserts the record.
@@ -214,11 +229,13 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
       // Populates all fields. The attribute with 'NOT NULL' would be skipped
       // if the value is empty.
       $fields = array();
-      $fields['abbreviation'] = $this->abbreviation;
-      $fields['genus']        = $this->genus;
-      $fields['species']      = $this->species;
-      $fields['common_name']  = $this->common_name;
-      $fields['comment']      = $this->comment;
+      $fields['abbreviation']       = $this->abbreviation;
+      $fields['genus']              = $this->genus;
+      $fields['species']            = $this->species;
+      $fields['infraspecific_name'] = $this->infraspecific_name;
+      $fields['type_id']            = $this->type_id;
+      $fields['common_name']        = $this->common_name;
+      $fields['comment']            = $this->comment;
 
 
       // Updates the record.
@@ -372,6 +389,42 @@ class CHADO_ORGANISM  extends CHADO_TABLE {
    */
   public function setSpecies($species) {
     $this->species = $species;
+  }
+
+  /**
+   * Retrieves the infraspecific_name.
+   *
+   * @retrun character_varying(255)
+   */
+  public function getInfraspecific_name() {
+    return $this->Infraspecific_name;
+  }
+
+  /**
+   * Sets the infraspecific_name.
+   *
+   * @param character_varying(255) $infraspecific_name
+   */
+  public function setInfraspecific_name($infraspecific_name) {
+    $this->infraspecific_name = $infraspecific_name;
+  }
+
+  /**
+   * Retrieves the type_id.
+   *
+   * @return integer
+   */
+  public function getType_id() {
+    return $this->type_id;
+  }
+
+  /**
+   * Sets the type_id.
+   *
+   * @param integer $type_id
+   */
+  public function setType_id($type_id) {
+    $this->type_id = $type_id;
   }
 
   /**

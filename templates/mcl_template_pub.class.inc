@@ -240,6 +240,7 @@ class MCL_TEMPLATE_PUB extends MCL_TEMPLATE {
       $pub->addProp($this, 'tripal_pub', 'journal abbreviation', $line['journal_abb']);
       $pub->addProp($this, 'tripal_pub', 'doi', $line['doi']);
       $pub->addProp($this, 'tripal_pub', 'url', $line['url']);
+      $pub->addProp($this, 'tripal_pub', 'citation', $citation);
       $pub->addProp($this, 'tripal_pub', 'alias', $line['alias']);
       $pub->addProp($this, 'tripal_pub', 'publication code', $line['pub_code']);
       $pub->addProp($this, 'tripal_pub', 'accepted date', $line['accepted_date']);

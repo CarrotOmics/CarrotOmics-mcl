@@ -142,9 +142,9 @@ class MCL_CHADO_DB extends CHADO_DB {
     else {
 
       // Adds a new db.
-      $args['urlprefix']    = $prefix_url;
-      $args['url']          = $url;
-      $args['description']  = $description;
+      $args['urlprefix']  = $prefix_url;
+      $args['url']        = $url;
+      $args['description'] = $description;
       $db = new MCL_CHADO_DB($args);
       if ($db->insert()) {
         self::addMsg($mcl_tmpl, 'N', 'db', $args);

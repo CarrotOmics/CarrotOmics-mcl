@@ -42,6 +42,8 @@ class MCL_TEMPLATE_MAP extends MCL_TEMPLATE {
       'map_name'        => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the map given by the database curator - follow each database's naming convention."),
       'genus'           => array('req' => TRUE,  'width' => 10, 'desc' => "Genus of the mapping population."),
       'species'         => array('req' => TRUE,  'width' => 10, 'desc' => "species of the mapping population. Multiple species can be entered with ';' in between for the mapping populations from inter-specific crosses."),
+      'infraspecific_type'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'map_unit'        => array('req' => TRUE,  'width' => 10, 'desc' => "cM, bp, etc."),
       'analysis_method' => array('req' => FALSE, 'width' => 10, 'desc' => "Analysis method for the mapping."),
       'software'        => array('req' => FALSE, 'width' => 10, 'desc' => "Software used for map construction."),
@@ -82,7 +84,7 @@ class MCL_TEMPLATE_MAP extends MCL_TEMPLATE {
   public function runErrorCheckDataLine($line) {
 
     // Checks organism for map.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species'], "[;]");
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], "[;]");
 
     // Checks map_unit.
     MCL_CHADO_FEATUREMAP::checkMapUnit($this, $line['map_unit']);
@@ -121,7 +123,7 @@ class MCL_TEMPLATE_MAP extends MCL_TEMPLATE {
       $this->addSpecialColumns('##', $map, $line);
 
       // Adds the organisms.
-      $map->addOrganism($this, $line['genus'], $line['species'], "[;]");
+      $map->addOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], "[;]");
 
       // Adds the stocks.
       $map->addStock($this, $line['population_name'], '', '', "[;]");

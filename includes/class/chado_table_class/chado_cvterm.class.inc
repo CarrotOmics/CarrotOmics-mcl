@@ -229,6 +229,7 @@ class CHADO_CVTERM  extends CHADO_TABLE {
         array('table' => 'nd_reagent', 'attr' => 'type_id'),
         array('table' => 'nd_reagent_relationship', 'attr' => 'type_id'),
         array('table' => 'nd_reagentprop', 'attr' => 'type_id'),
+        array('table' => 'organism', 'attr' => 'type_id'),
         array('table' => 'organism_relationship', 'attr' => 'type_id'),
         array('table' => 'organismprop', 'attr' => 'type_id'),
         array('table' => 'phendesc', 'attr' => 'type_id'),

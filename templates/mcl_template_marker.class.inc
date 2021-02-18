@@ -43,6 +43,8 @@ class MCL_TEMPLATE_MARKER extends MCL_TEMPLATE {
       'marker_type'               => array('req' => TRUE,  'width' => 10, 'desc' => "Marker type such as SSR, RFLP, RAPD, STS, SCAR, overgo probe and Isozyme. Refer to the available marker_type page for each database."),
       'genus'                     => array('req' => TRUE,  'width' => 10, 'desc' => "The genus name of the organism from which the marker was developed."),
       'species'                   => array('req' => TRUE,  'width' => 10, 'desc' => "The species name of the organism from which the marker was developed. Enter 'sp.' to represent one unknown species, 'spp.' to represent multiple unknown species."),
+      'infraspecific_type'        => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'        => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'alias'                     => array('req' => FALSE, 'width' => 10, 'desc' => "Other names used for the marker. Multiple aliases, separated by a semicolon (;), can be added."),
       'marker_locus'              => array('req' => FALSE, 'width' => 10, 'desc' => "Name of the marker locus. Multiple loci, separated by a semicolon (;), can be added.."),
       'marker_sequence'           => array('req' => FALSE, 'width' => 10, 'desc' => "Sequence of the marker when available. For SNP, it should be in the format of 5'flanking sequence[A/T] 3'flanking sequence."),
@@ -139,16 +141,16 @@ class MCL_TEMPLATE_MARKER extends MCL_TEMPLATE {
 
     // Checks db.
     MCL_CHADO_DB::checkDB($this, 'dbSNP');
-    MCL_CHADO_DB::checkDB($this, 'DB:genbank');
+    MCL_CHADO_DB::checkDB($this, 'genbank');
 
     // Checks marker name for uniqueness.
-    MCL_CHADO_FEATURE::checkFeatureUniquenameForUniqueness($this, $line['marker_name'], $line['genus'], $line['species'], $this->cvterms['sequence']['genetic_marker']);
+    MCL_CHADO_FEATURE::checkFeatureUniquenameForUniquenessInfra($this, $line['marker_name'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['sequence']['genetic_marker']);
 
     // Checks marker locus name for uniqueness.
-    MCL_CHADO_FEATURE::checkFeatureUniquenameForUniqueness($this, $line['marker_locus'], $line['genus'], $line['species'], $this->cvterms['SITE_CV']['marker_locus']);
+    MCL_CHADO_FEATURE::checkFeatureUniquenameForUniquenessInfra($this, $line['marker_locus'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['SITE_CV']['marker_locus']);
 
     // Checks organism.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Checks residues.
     MCL_CHADO_FEATURE::checkResidues($this, $line['marker_sequence']);
@@ -193,7 +195,7 @@ class MCL_TEMPLATE_MARKER extends MCL_TEMPLATE {
   public function uploadDataLine($line) {
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
 
     // Adds a marker.
     $marker = MCL_CHADO_FEATURE::addFeature($this, $line['marker_name'], $line['marker_name'], $this->cvterms['sequence']['genetic_marker'], $organism->getOrganismID());
@@ -296,7 +298,7 @@ class MCL_TEMPLATE_MARKER extends MCL_TEMPLATE {
       $marker->addLocus($this, $line['marker_locus'], $this->cvterms, "[,;]");
 
       // Adds gb_id (accession).
-      $db = MCL_CHADO_DB::getDB('DB:genbank');
+      $db = MCL_CHADO_DB::getDB('genbank');
       $marker->addDBXref($this, $db->getDbID(), $line['gb_id'], "[,;]");
 
       // Adds dbsnp_id (SS ID).
@@ -316,7 +318,7 @@ class MCL_TEMPLATE_MARKER extends MCL_TEMPLATE {
       }
 
       // Adds varieties.
-      $marker->addStock($this, $line['variety'], $line['genus'], $line['species'], $this->cvterms['SITE_CV']['source'], "[,;]");
+      $marker->addStockInfra($this, $line['variety'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['SITE_CV']['source'], "[,;]");
 
       // Adds contacts.
       $marker->addContact($this, $line['contact'], "[;]");

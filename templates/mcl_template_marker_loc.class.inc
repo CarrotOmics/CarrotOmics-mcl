@@ -44,6 +44,8 @@ class MCL_TEMPLATE_MARKER_LOC extends MCL_TEMPLATE {
       'marker_name' => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the marker."),
       'genus'       => array('req' => FALSE, 'width' => 10, 'desc' => "The genus name of the organism from which the marker was developed."),
       'species'     => array('req' => FALSE, 'width' => 10, 'desc' => "The species name of the organism from which the marker was developed. Enter 'sp.' to represent one unknown species, 'spp.' to represent multiple unknown species."),
+      'infraspecific_type' => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name' => array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'fmin'        => array('req' => FALSE, 'width' => 10, 'desc' => "The leftmost/minimal boundar"),
       'fmax'        => array('req' => FALSE, 'width' => 10, 'desc' => "The rightmost/maximal boundary"),
       'strand'      => array('req' => FALSE, 'width' => 10, 'desc' => "Orientation of the location (should be 0, -1 or +1)"),
@@ -70,10 +72,10 @@ class MCL_TEMPLATE_MARKER_LOC extends MCL_TEMPLATE {
     MCL_CHADO_ANALYSIS::checkAnalysis($this, $line['genome']);
 
     // Checks chromosome.
-    MCL_CHADO_FEATURE::checkFeature($this, $line['chromosome'], NULL, NULL, $this->cvterms['sequence']['chromosome']);
+    MCL_CHADO_FEATURE::checkFeatureInfra($this, $line['chromosome'], NULL, NULL, NULL, NULL, $this->cvterms['sequence']['chromosome']);
 
     // Checks marker.
-    MCL_CHADO_FEATURE::checkFeature($this, $line['marker_name'], $line['genus'], $line['species'], $this->cvterms['sequence']['genetic_marker']);
+    MCL_CHADO_FEATURE::checkFeatureInfra($this, $line['marker_name'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['sequence']['genetic_marker']);
 
     // Checks locations.
     $this->checkRange($line['fmin'], $line['fmax']);
@@ -91,10 +93,10 @@ class MCL_TEMPLATE_MARKER_LOC extends MCL_TEMPLATE {
     $genome = MCL_CHADO_ANALYSIS::byName($line['genome']);
 
     // Gets the chromosome.
-    $chromosome = MCL_CHADO_FEATURE::getFeature($line['chromosome'], '', '', $this->cvterms['sequence']['chromosome']);
+    $chromosome = MCL_CHADO_FEATURE::getFeatureInfra($line['chromosome'], '', '', '', '', $this->cvterms['sequence']['chromosome']);
 
     // Gets the marker.
-    $marker = MCL_CHADO_FEATURE::getFeature($line['marker_name'], $line['genus'], $line['species'], $this->cvterms['sequence']['genetic_marker']);
+    $marker = MCL_CHADO_FEATURE::getFeatureInfra($line['marker_name'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], $this->cvterms['sequence']['genetic_marker']);
 
     // Adds the marker locations.
     if ($line['fmax'] || $line['fmin']) {

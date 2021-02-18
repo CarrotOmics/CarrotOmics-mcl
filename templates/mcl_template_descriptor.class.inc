@@ -66,10 +66,16 @@ class MCL_TEMPLATE_DESCRIPTOR extends MCL_TEMPLATE {
   public function runErrorCheckDataLine($line) {
 
     // Checks cv for trait_descriptor_set.
-    MCL_CHADO_CV::checkCV($this, $line['trait_descriptor_set']);
+    // default to site ontology if none specified in the 'trait_descriptor_set' column
+    $name = $line['trait_descriptor_set'];
+    if (!$name) {
+      $name = MCL_SITE_VAR::getValueByName('SITE_TRAIT_ONTOLOGY');
+    }
+    MCL_CHADO_CV::checkCV($this, $name);
 
     // Checks trait_name.
-    MCL_CHADO_CVTERM::checkCvterm($this, MCL_SITE_VAR::getValueByName('SITE_TRAIT_ONTOLOGY'), $line['trait_name']);
+    MCL_CHADO_CVTERM::checkCvterm($this, $name, $line['trait_name']);
+
   }
 
   /**

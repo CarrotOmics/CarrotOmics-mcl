@@ -119,6 +119,8 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
    * @return boolean
    */
   public static function checkStockID(MCL_TEMPLATE $mcl_tmpl = NULL, $stock_id, $warning = FALSE) {
+    $caller = debug_backtrace()[1]['function'];
+    mcl_print("*** WARNING Calling deprecated checkStock $genus $species from $caller", 2, 1.1);
 
     // Gets the stock.
     $stock = NULL;
@@ -191,16 +193,109 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
         }
 
         // If '::' found in uniquename, update uniquename and organism_id.
-        if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-          $genus          = trim($matches[1]);
-          $species        = trim($matches[2]);
-          $uniquename     = trim($matches[3]);
-          $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+        if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+          $uniquename         = trim($matches[2]);
+          $parts = preg_split("/\s+/", trim($matches[1]));
+          $genus              = $parts[0];
+          $species            = $parts[1];
+          $infraspecific_type = $parts[2];
+          $infraspecific_name = $parts[3];
+          $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
           if ($diff_organism) {
             $args['organism_id'] = $diff_organism->getOrganismID();
           }
           else {
-            self::updateMsg($mcl_tmpl, 'E', "$genus $species not found in organism");
+            self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+            $flag = FALSE;
+          }
+        }
+
+        // Checks the stock.
+        $stock = MCL_CHADO_STOCK::byKey($args);
+        if (!$stock) {
+          if ($warning) {
+            self::updateMsg($mcl_tmpl, 'W', self::arrStr($args) . " not found in stock");
+          }
+          else {
+            self::updateMsg($mcl_tmpl, 'E', self::arrStr($args) . " not found in stock");
+            $flag = FALSE;
+          }
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Checks the existence of stock. If not, write the error messasge
+   * to the log.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $stock
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param string $type
+   * @param string $separator
+   * @param boolean $warning
+   *
+   * @return boolean
+   */
+  public static function checkStockInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $stock, $genus = '', $species = '', $infraspecific_type = 'no_rank', $infraspecific_name = NULL, $type = '', $separator = '', $warning = FALSE) {
+    $flag = TRUE;
+    if ($stock) {
+
+      // Gets the organism ID.
+      $organism_id = NULL;
+      if ($genus && $species) {
+        $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+        if (!$organism) {
+          self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+          return FALSE;
+        }
+        $organism_id = $organism->getOrganismID();
+      }
+
+      // Gets the type ID.
+      $type_id = NULL;
+      if ($type) {
+        $stock_type = MCL_CHADO_CVTERM::getCvterm('SITE_CV', $type);
+        if (!$stock_type) {
+          self::updateMsg($mcl_tmpl, 'E', "$type not found in chado.cvterm");
+          return FALSE;
+        }
+        $type_id = $stock_type->getCvtermID();
+      }
+
+      // Gets the uniquenames.
+      $uniquenames = preg_split(self::getSepRegex($separator), $stock, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($uniquenames as $uniquename) {
+        $uniquename = trim($uniquename);
+
+        // Sets the arguments.
+        $args = array('uniquename' => $uniquename);
+        if ($organism_id) {
+          $args['organism_id'] = $organism_id;
+        }
+        if ($type_id) {
+          $args['type_id'] = $type_id;
+        }
+
+        // If '::' found in uniquename, update uniquename and organism_id.
+        if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+          $uniquename         = trim($matches[2]);
+          $parts = preg_split("/\s+/", trim($matches[1]));
+          $genus              = $parts[0];
+          $species            = $parts[1];
+          $infraspecific_type = $parts[2];
+          $infraspecific_name = $parts[3];
+          $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+          if ($diff_organism) {
+            $args['organism_id'] = $diff_organism->getOrganismID();
+          }
+          else {
+            self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
             $flag = FALSE;
           }
         }
@@ -234,6 +329,8 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
    * @return boolean
    */
   public static function checkSecondaryID(MCL_TEMPLATE $mcl_tmpl = NULL, $second_id, $genus = '', $species = '', $separator = '') {
+    $caller = debug_backtrace()[1]['function'];
+    mcl_print("*** WARNING Calling deprecated checkSecondaryID $genus $species from $caller", 2, 1.1);
     $flag = TRUE;
     if ($second_id) {
 
@@ -260,16 +357,86 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
         }
 
         // If '::' found in name, update uniquename and organism_id.
-        if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $name, $matches)) {
-          $genus          = trim($matches[1]);
-          $species        = trim($matches[2]);
-          $uniquename     = trim($matches[3]);
-          $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+        if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+          $uniquename         = trim($matches[2]);
+          $parts = preg_split("/\s+/", trim($matches[1]));
+          $genus              = $parts[0];
+          $species            = $parts[1];
+          $infraspecific_type = $parts[2];
+          $infraspecific_name = $parts[3];
+          $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
           if ($diff_organism) {
             $args['organism_id'] = $diff_organism->getOrganismID();
           }
           else {
-            self::updateMsg($mcl_tmpl, 'E', "$genus $species not found in organism");
+            self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+            $flag = FALSE;
+          }
+        }
+
+        // Checks the stock.
+        $stock = MCL_CHADO_STOCK::byKey($args);
+        if (!$stock) {
+          self::updateMsg($mcl_tmpl, 'E', self::arrStr($args) . " not found in stock");
+          $flag = FALSE;
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Checks the existence of the secondary ID. If not, write the error messasge
+   * to the log.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $second_id
+   * @param string $genus
+   * @param string $species
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public static function checkSecondaryIDInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $second_id, $genus = '', $species = '', $infraspecific_type = '', $infraspecific_name = '', $separator = '') {
+    $flag = TRUE;
+    if ($second_id) {
+
+      // Gets the organism_id.
+      $organism_id = NULL;
+      if ($genus && $species) {
+        $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+        if (!$organism) {
+          self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
+          return FALSE;
+        }
+        $organism_id = $organism->getOrganismID();
+      }
+
+      // Gets the uniquenames.
+      $names = preg_split(self::getSepRegex($separator), $second_id, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($names as $name) {
+        $name = trim($name);
+
+        // Sets the arguments.
+        $args = array('name' => $name);
+        if ($organism_id) {
+          $args['organism_id'] = $organism_id;
+        }
+
+        // If '::' found in name, update uniquename and organism_id.
+        if (preg_match("/^(.*?)::(.*?)$/", $name, $matches)) {
+          $name               = trim($matches[2]);
+          $parts = preg_split("/\s+/", trim($matches[1]));
+          $genus              = $parts[0];
+          $species            = $parts[1];
+          $infraspecific_type = $parts[2];
+          $infraspecific_name = $parts[3];
+          $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
+          if ($diff_organism) {
+            $args['organism_id'] = $diff_organism->getOrganismID();
+          }
+          else {
+            self::updateMsg($mcl_tmpl, 'E', "$genus $species $infraspecific_type $infraspecific_name not found in organism");
             $flag = FALSE;
           }
         }
@@ -324,6 +491,8 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
    * @return MCL_CHADO_STOCK
    */
   public static function getStock($uniquename, $genus = '', $species = '', $type = '') {
+    $caller = debug_backtrace()[1]['function'];
+    mcl_print("*** WARNING Calling deprecated getStock $genus $species from $caller", 2, 1.1);
 
     // Sets the args.
     $args = array(
@@ -333,6 +502,41 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
     // Adds the organism.
     if ($genus && $species) {
       $organism = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      $args['organism_id'] = $organism->getOrganismID();
+    }
+
+    // Adds the type.
+    if ($type) {
+      $cvterm = MCL_CHADO_CVTERM::getCvterm('SITE_CV', $type);
+      if ($cvterm) {
+        $args['type_id'] = $cvterm->getCvtermID();
+      }
+    }
+    return MCL_CHADO_STOCK::byKey($args);
+  }
+
+  /**
+   * Returns the stock by uniquename, genus and species.
+   *
+   * @param string $uniquename
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param string $type
+   *
+   * @return MCL_CHADO_STOCK
+   */
+  public static function getStockInfra($uniquename, $genus = '', $species = '', $infraspecific_type = 'no_rank', $infraspecific_name = NULL, $type = '') {
+
+    // Sets the args.
+    $args = array(
+      'uniquename' => $uniquename,
+    );
+
+    // Adds the organism.
+    if ($genus && $species) {
+      $organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
       $args['organism_id'] = $organism->getOrganismID();
     }
 
@@ -688,11 +892,14 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
     if ($uniquename && $type_id_relationship) {
 
       // If '::' found in uniquename, update uniquename and organism_id.
-      if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-        $genus          = trim($matches[1]);
-        $species        = trim($matches[2]);
-        $uniquename     = trim($matches[3]);
-        $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+        $uniquename         = trim($matches[2]);
+        $parts = preg_split("/\s+/", trim($matches[1]));
+        $genus              = $parts[0];
+        $species            = $parts[1];
+        $infraspecific_type = $parts[2];
+        $infraspecific_name = $parts[3];
+        $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
         if ($diff_organism) {
           $organism_id = $diff_organism->getOrganismID();
         }

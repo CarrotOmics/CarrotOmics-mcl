@@ -212,6 +212,57 @@ class MCL_CHADO_FEATUREMAP extends CHADO_FEATUREMAP {
   }
 
   /**
+   * Adds stock to featuremap_organism.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $genus
+   * @param string $species
+   * @param string $infraspecific_type
+   * @param string $infraspecific_name
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addOrganismInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $genus, $species, $infraspecific_type, $infraspecific_name, $separator = '') {
+    // this function allows the specification of multiple organisms by incorporating
+    // multiple values in one or more fields with a delimiter specified by the
+    // passed value of $separator
+    // Examples genus="A" species="B;C" becomes  genus A species B  +  genus A species C
+    //   genus="D;E" species="F;G" becomes  genus D species F  +  genus E species G
+    // this extends similarly to infraspecific nomenclature, for example
+    //   genus="H" species="I:J" infraspecific_type="subspecies" infraspecific_name="K"
+    //   becomes  genus H species I subspecies K  + genus H species J
+    $flag = TRUE;
+    if ($genus && $species) {
+      $gns = preg_split($this->getSepRegex($separator), $genus, -1, PREG_SPLIT_NO_EMPTY);
+      $sps = preg_split($this->getSepRegex($separator), $species, -1, PREG_SPLIT_NO_EMPTY);
+      $its = preg_split($this->getSepRegex($separator), $infraspecific_type, -1);
+      $ins = preg_split($this->getSepRegex($separator), $infraspecific_name, -1);
+      $ntaxa = max(sizeof($gns), sizeof($sps), sizeof($its), sizeof($ins));
+      // now loop over each specified organism, and if a value is not present
+      // for genus or species, use the last value seen
+      for ($i=0; $i<$ntaxa; $i++) {
+        $gn = $gns[$i] ?? $gns[sizeof($gns)-1];
+        $sp = $sps[$i] ?? $sps[sizeof($sps)-1];
+        $it = $its[$i] ?? NULL;
+        $in = $ins[$i] ?? NULL;
+        // Gets the organism.
+        $organism = MCL_CHADO_ORGANISM::getOrganismInfra($gn, $sp, $it, $in);
+        if ($organism) {
+          if (!$this->addLink($mcl_tmpl, 'featuremap_organism', 'featuremap_id', $this->featuremap_id, 'organism_id', $organism->getOrganismID())) {
+            $flag = FALSE;
+          }
+        }
+        else {
+          $this->updateMsg($mcl_tmpl, 'E', "(genus, species, [infraspecific_type, infraspecific_name]) = ($gn, $sp, $it, $in) not found in organism");
+          $flag = FALSE;
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
    * Adds stock to featuremap_stock.
    *
    * @param MCL_TEMPLATE $mcl_tmpl

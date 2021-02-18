@@ -503,7 +503,8 @@ class MCL_JOB extends PUBLIC_MCL_JOB {
     }
 
     // Creates a progress file.
-    file_put_contents($progress_file, 'RESET PROGRESS');
+    // CarrotOmics change, prefix with timestamp
+    file_put_contents($progress_file, date("Y-m-d H:i:s") . ' ' .'RESET PROGRESS');
   }
 
   /**
@@ -529,7 +530,12 @@ class MCL_JOB extends PUBLIC_MCL_JOB {
    * @param string $progress
    * @param boolean $append
    */
-  public function setProgress($progress, $append = FALSE) {
+
+  // CarrotOmics change, default to append mode
+  public function setProgress($progress, $append = TRUE) {
+
+    // CarrotOmics change, prefix with timestamp
+    $progress = date("Y-m-d H:i:s") . ' ' . $progress;
 
     // Gets the process file.
     $progress_file = $this->getJobDir() . '/progress';

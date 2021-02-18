@@ -188,6 +188,9 @@ class MCL_CHADO_LOCATION extends CHADO_ND_GEOLOCATION {
    *   - latitude
    *   - longitude
    *   - altitude
+   *   - latitude_dev
+   *   - longitude_dev
+   *   - altitude_dev
    *   - geodetic_datum
    *
    * @return MCL_CHADO_LOCATION
@@ -204,7 +207,7 @@ class MCL_CHADO_LOCATION extends CHADO_ND_GEOLOCATION {
 
     // Checks $loc_info.
     if (!empty($loc_info)) {
-      $valid_keys = array('latitude', 'longitude', 'altitude', 'geodetic_datum');
+      $valid_keys = array('latitude', 'longitude', 'altitude', 'latitude_dev', 'longitude_dev', 'altitude_dev', 'geodetic_datum');
       foreach ($loc_info as $key => $value) {
         if (!in_array($key, $valid_keys)) {
           self::updateMsg($mcl_tmpl, 'E', "$key is an invalid attribute of nd_geolocation table");

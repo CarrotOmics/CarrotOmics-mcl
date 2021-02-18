@@ -66,8 +66,9 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
       'germplasm_type'    => array('req' => TRUE,  'width' => 10, 'desc' => "Select from the three choices (cultivar, breeding_research_material, or wild_unimproved) for an individual germplasm or 'population' for a group of individual."),
       'genus'             => array('req' => TRUE,  'width' => 10, 'desc' => "Genus to which the stock belongs to."),
       'species'           => array('req' => TRUE,  'width' => 10, 'desc' => "Species name. Enter 'sp.' to represent one unknown species, 'spp.' to represent multiple unknown species."),
-      'grin_id'           => array('req' => FALSE, 'width' => 10, 'desc' => "Accession ID (ACID) in the GRIN database, if it is known. Multiple GRIN ID, separated by comma, can be added."),
-      'subspecies'        => array('req' => FALSE, 'width' => 10, 'desc' => "Subspecies name."),
+      'infraspecific_type'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
+      'infraspecific_name'=> array('req' => FALSE, 'width' => 10, 'desc' => "Infraspecific name of the stock"),
+      'germplasm_id'      => array('req' => FALSE, 'width' => 10, 'desc' => "Accession ID (ACID) in a germplasm database, if it is known. e.g. \"GRIN:PI 123456\" Multiple ACID values, separated by comma, can be added."),
       'description'       => array('req' => FALSE, 'width' => 10, 'desc' => "Stock_name for the pollen parent of this entry.  This stock_name must also have its own record in this table (it should be entered before being listed as a parent)."),
       'secondary_id'      => array('req' => FALSE, 'width' => 10, 'desc' => "Alternate ID or name that is commonly used to refer to the entry."),
       'maternal_parent'   => array('req' => FALSE, 'width' => 10, 'desc' => "Stock name of the maternal parnet. It must exist in stock table or listed in this sheet. If the organims of the parent and the child are different, add the organism as prefix of name of parent separated by double colon '::'."),
@@ -89,7 +90,7 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
     );
 
     // Adds labels.
-    $headers['grin_id']['label']      = 'GRIN_ID';
+    $headers['germplasm_id']['label'] = 'Germplasm_ID';
     $headers['secondary_id']['label'] = 'secondary_ID';
     return $headers;
   }
@@ -99,7 +100,6 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
    */
   public function defineCvterms() {
     $cvterms = array();
-//    $cvterms['SITE_CV']['stock_type']                 = -1;
     $cvterms['SITE_CV']['alias']                      = -1;
     $cvterms['SITE_CV']['secondary_id']               = -1;
     $cvterms['SITE_CV']['germplasm_center']           = -1;
@@ -118,7 +118,6 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
     $cvterms['SITE_CV']['origin_detail']              = -1;
     $cvterms['SITE_CV']['comments']                   = -1;
     $cvterms['SITE_CV']['population_size']            = -1;
-    $cvterms['SITE_CV']['subspecies']                 = -1;
     return $cvterms;
   }
 
@@ -127,11 +126,22 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
    */
   public function runErrorCheckDataLine($line) {
 
-    // Checks DB for GRIN.
-    MCL_CHADO_DB::checkDB($this, 'GRIN');
+    // Checks DB for existence of supplied germplasm_id prefix
+    if ($line['germplasm_id']) {
+      $accessions = preg_split("/[,;]/", $line['germplasm_id'] );
+      foreach ($accessions as $accession) {
+        $parts = explode(":", $accession);
+        if ($parts[1]) {
+          MCL_CHADO_DB::checkDB($this, $parts[0]);
+        }
+        else {
+          $this->updateMsg('E', 'Invalid germplasm_id "'.$accession.'": ' . $line['germplasm_id']);
+        }
+      }
+    }
 
     // Checks organism.
-    MCL_CHADO_ORGANISM::checkOrganism($this, $line['genus'], $line['species']);
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], "[;]");
 
     // Checks aliases.
     MCL_CHADO_STOCK::checkAlias($this, $line['alias'], "[,;]");
@@ -154,7 +164,7 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
   public function uploadDataLine($line) {
 
     // Gets the organism.
-    $organism = MCL_CHADO_ORGANISM::getOrganism($line['genus'], $line['species']);
+    $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
     $organism_id = $organism->getOrganismID();
 
     // Gets stock type.
@@ -168,11 +178,18 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
     if ($stock) {
 
       // Gets and add the DB.
-      $db = MCL_CHADO_DB::getDB('GRIN');
-      $stock->addDB($this, $db, $line['grin_id'], "[,;]");
+      if ($line['germplasm_id']) {
+        $accessions = preg_split("/[,;]/", $line['germplasm_id'] );
+        foreach ($accessions as $accession) {
+          $parts = explode(":", $accession);
+          if ($parts[1]) {
+            $db = MCL_CHADO_DB::getDB($parts[0]);
+            $stock->addDB($this, $db, $parts[1], "[,;]");
+          }
+        }
+      }
 
       // Adds properties.
-      //$stock->addProp($this, 'SITE_CV', 'stock_type', $line['germplasm_type']);
       $stock->addProp($this, 'SITE_CV', 'secondary_id', $line['secondary_id']);
       $stock->addProp($this, 'SITE_CV', 'description', $line['description']);
       $stock->addProp($this, 'SITE_CV', 'cultivar', $line['cultivar']);
@@ -180,7 +197,7 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
       $stock->addProp($this, 'SITE_CV', 'origin_country', $line['origin_country']);
       $stock->addProp($this, 'SITE_CV', 'origin_detail', $line['origin_detail']);
       $stock->addProp($this, 'SITE_CV', 'population_size', $line['population_size']);
-      $stock->addProp($this, 'SITE_CV', 'subspecies', $line['subspecies']);
+      $stock->addProp($this, 'taxonomic_rank', 'type_id', $line['infraspecific_type']);
       $stock->addProp($this, 'SITE_CV', 'germplasm_center', $line['germplasm_center']);
       $stock->addProp($this, 'SITE_CV', 'comments', $line['comments']);
 
@@ -248,11 +265,15 @@ class MCL_TEMPLATE_STOCK extends MCL_TEMPLATE {
 
       // Checks the parent. If '::' found in uniquename, update uniquename
       // and organism_id.
-      if (preg_match("/^(.*?)\s+(.*?)::(.*?)$/", $uniquename, $matches)) {
-        $genus          = trim($matches[1]);
-        $species        = trim($matches[2]);
-        $uniquename     = trim($matches[3]);
-        $diff_organism  = MCL_CHADO_ORGANISM::getOrganism($genus, $species);
+      // Example "Daucus carota::B493B" or "Daucus carota subspecies sativus::B493B"
+      if (preg_match("/^(.*?)::(.*?)$/", $uniquename, $matches)) {
+        $uniquename         = trim($matches[2]);
+        $parts = preg_split("/\s+/", trim($matches[1]));
+        $genus              = $parts[0];
+        $species            = $parts[1];
+        $infraspecific_type = $parts[2];
+        $infraspecific_name = $parts[3];
+        $diff_organism = MCL_CHADO_ORGANISM::getOrganismInfra($genus, $species, $infraspecific_type, $infraspecific_name);
         $organism_id = $diff_organism->getOrganismID();
       }
       $keys = array(
