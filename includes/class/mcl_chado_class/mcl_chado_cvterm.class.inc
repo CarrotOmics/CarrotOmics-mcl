@@ -468,14 +468,14 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
       self::updateMsg($mcl_tmpl, 'D', "(cv.name, cvterm.name) = ($cv_name, $cvterm_name) found in cvterm");
     }
     else {
-      
+
       // Gets db.
       $db = MCL_CHADO_DB::getDB($db_name);
       if (!$db) {
         self::updateMsg($mcl_tmpl, 'E', "(db.name) = ($db_name) not found in db");
         return NULL;
       }
-      
+
       // Gets cv.
       $cv = MCL_CHADO_CV::getCV($cv_name);
       if (!$cv) {

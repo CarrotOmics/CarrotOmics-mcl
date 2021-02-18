@@ -398,6 +398,23 @@ DESC;
             continue;
           }
 
+          // Checks the required cvterms for this template.
+          $missing_cvterm = FALSE;
+          $req_cvterms = $mcl_template->defineCvterms();
+          foreach ((array)$req_cvterms as $cv_name => $cvterm_names) {
+            foreach ((array)$cvterm_names as $cvterm_name => $num) {
+              $cvterm = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name);
+              if (!$cvterm) {
+                $missing_cvterm = TRUE;
+                drupal_set_message("$cvterm_name [$cv_name] not found");
+              }
+            }
+          }
+          if ($missing_cvterm) {
+            drupal_set_message("The required cvterms for $class_name are missing. Please add them first.");
+            continue;
+          }
+
           // Adds a new template.
           if (MCL_TEMPLATE::addTemplate($mcl_template->getTemplateType(), $template_name, 0)) {
             drupal_set_message("New template of $class_name has been added.");
