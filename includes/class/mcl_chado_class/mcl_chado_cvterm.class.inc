@@ -72,7 +72,7 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
     // Updates dbxref.accession.
     $dbxref = MCL_CHADO_DBXREF::byID($this->dbxref_id);
     if ($dbxref) {
-      $accession = $this->cv_id . ':' . $this->name;
+      $accession = $this->name;
       $dbxref->setAccession($accession);
       if ($dbxref->update()) {
         return parent::update();
@@ -485,7 +485,7 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
 
       // Sets the accession.
       if (!$accession) {
-        $accession = $cv->getCvID() . ":$cvterm_name";
+        $accession = $cvterm_name;
       }
 
       // Gets dbxref.
