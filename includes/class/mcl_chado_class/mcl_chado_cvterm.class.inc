@@ -492,6 +492,7 @@ class MCL_CHADO_CVTERM extends CHADO_CVTERM {
       $args = array(
         'db_id'     => $db->getDbID(),
         'accession' => $accession,
+        'version'   => $cv->getCvID(),
       );
       $dbxref = MCL_CHADO_DBXREF::byKey($args);
       if (!$dbxref) {
