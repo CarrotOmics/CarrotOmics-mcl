@@ -1345,7 +1345,7 @@ DESC;
       if ($line_no % 500 == 0) {
         //mcl_display_memory_usage("MEMORY-CHECK [ECD] = $line_no");
         if ($total_lines) {
-          $progress = sprintf("%s : %d / %d = %.03f %% [Error Checking Data]", $this->template, $line_no, $total_lines, $line_no / $total_lines * 100.0);
+          $progress = sprintf("%s : %d / %d = %.03f %% [Checking Data for Errors]", $this->template, $line_no, $total_lines, $line_no / $total_lines * 100.0);
           $this->job->setProgress($progress);
         }
       }
