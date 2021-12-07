@@ -1662,7 +1662,7 @@ DESC;
    * @return boolean
    */
   public function checkLength($max_length, $key, $value) {
-    if ($value && (strlen($value) >= $max_length)) {
+    if ($value && (strlen($value) > $max_length)) {
       $this->updateMsg('E', "$key '$value' exceeds the maximum length ($max_length) of the data.");
       return FALSE;
     }

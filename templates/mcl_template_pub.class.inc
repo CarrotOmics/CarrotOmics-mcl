@@ -187,7 +187,7 @@ class MCL_TEMPLATE_PUB extends MCL_TEMPLATE {
     $this->checkLength(255, 'volume', $line['volume']);
     $this->checkLength(255, 'issue', $line['issue']);
     $this->checkLength(255, 'pages', $line['pages']);
-    $this->checkLength(255, 'pub_year', $line['pub_year']);
+    $this->checkLength(4, 'pub_year', $line['pub_year']);
 
     // Checks for publication type.
     if (!MCL_DATA_VALID_TYPE::validate('pub_type', $line['type'])) {
