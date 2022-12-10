@@ -39,7 +39,7 @@ class MCL_TEMPLATE_IMAGE_PHENOTYPE_BIMS extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'    => array('req' => TRUE,  'width' => 15, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
+      'dataset_name'    => array('req' => TRUE,  'width' => 15, 'desc' => "Name of the phenotyping dataset (project). It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'unique_id'       => array('req' => TRUE,  'width' => 10, 'var' => TRUE, 'desc' => "Unique ID of sample"),
       'primary_order'   => array('req' => TRUE,  'width' => 10, 'var' => TRUE, 'desc' => "The primary order of a sample"),
       'secondary_order' => array('req' => TRUE,  'width' => 10, 'var' => TRUE, 'desc' => "The secondary order of a sample"),

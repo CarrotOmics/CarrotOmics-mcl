@@ -43,7 +43,7 @@ class MCL_TEMPLATE_GENOTYPE_SNP_LONG_FORM_BIMS extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset. It should match a dataset_name in 'Dataset' sheet."),
+      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset (project). It should match a dataset_name in 'Dataset' sheet."),
       'accession'       => array('req' => TRUE,  'width' => 15, 'var' => TRUE, 'desc' => "ID of the accession that has been phenotyped. It should match an 'accession' column entry in the 'Accession' sheet or 'progeny_name' column entry 'Progeny' sheet."),
       'genus'           => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the stock"),
       'species'         => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the stock"),

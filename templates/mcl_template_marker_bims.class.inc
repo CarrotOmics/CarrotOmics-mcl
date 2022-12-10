@@ -39,7 +39,7 @@ class MCL_TEMPLATE_MARKER_BIMS extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'      => array('req' => FALSE, 'width' => 15, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
+      'dataset_name'      => array('req' => FALSE, 'width' => 15, 'desc' => "Name of the phenotyping dataset (project). It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'marker_name'       => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the marker."),
       'marker_type'       => array('req' => TRUE,  'width' => 10, 'desc' => "Marker type such as SSR, RFLP, RAPD, STS, SCAR, overgo probe and Isozyme. Refer to the available marker_type page for each database."),
       'genus'             => array('req' => TRUE,  'width' => 10, 'desc' => "The genus name of the organism from which the marker was developed."),

@@ -39,14 +39,14 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'      => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
+      'dataset_name'      => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset (project). It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'stock_name'        => array('req' => TRUE,  'width' => 10, 'desc' => "ID of the stock that has been phenotyped. It should match a 'stock_name' column entry in the 'Stock' sheet or 'progeny_name' column entry 'Progeny' sheet."),
       'genus'             => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the stock"),
       'species'           => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the stock"),
       'infraspecific_type' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
       'infraspecific_name' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'sample_id'         => array('req' => TRUE,  'width' => 10, 'desc' => "The ID of the smallest sample or sub-sample that was tested (Each row should have unique sample_ID). If there is no unique sample ID, users can concatenate a set of columns that gives a unique phenotypic value and those columns become required fields. For example, if a combination of dataset_name, ID, phenotyping_date is unique for the specific phenotype, those three can be concatenated with '_' in between."),
-      'clone_id'          => array('req' => FALSE, 'width' => 10, 'desc' => "ID of a spefic clone if available (eg. individual tree)."),
+      'clone_id'          => array('req' => FALSE, 'width' => 10, 'desc' => "ID of a specific clone if available (eg. individual tree)."),
       'primary_order'     => array('req' => FALSE, 'width' => 10, 'desc' => "The primary order of a sample"),
       'secondary_order'   => array('req' => FALSE, 'width' => 10, 'desc' => "The secondary order of a sample"),
       'evaluator'         => array('req' => FALSE, 'width' => 10, 'desc' => "Person who did the phenotyping. Multiple person can be entered with ';' in between. It should match 'contact_name' of the Contact sheet."),
@@ -172,7 +172,7 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     $stock = MCL_CHADO_STOCK::byKey($args);
     if ($stock) {
 
-      // When organism is not specifiec, we get it from the stock.
+      // When organism is not specified, we get it from the stock.
       if (!$organism_id) {
         $organism_id = $stock->getOrganismID();
       }

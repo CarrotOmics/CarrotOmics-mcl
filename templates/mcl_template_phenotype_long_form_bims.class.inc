@@ -39,7 +39,7 @@ class MCL_TEMPLATE_PHENOTYPE_LONG_FORM_BIMS extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset. It should match a dataset_name in 'Dataset' sheet."),
+      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset (project). It should match a dataset_name in 'Dataset' sheet."),
       'accession'       => array('req' => TRUE,  'width' => 15, 'var' => TRUE, 'desc' => "ID of the accession that has been phenotyped. It should match an 'accession' column entry in the 'Accession' sheet or 'progeny_name' column entry 'Progeny' sheet."),
       'genus'           => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the accession"),
       'species'         => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the accession"),
@@ -48,7 +48,7 @@ class MCL_TEMPLATE_PHENOTYPE_LONG_FORM_BIMS extends MCL_TEMPLATE {
       'secondary_order' => array('req' => TRUE,  'width' => 10, 'var' => TRUE, 'desc' => "The secondary order of a sample"),
       'site_name'       => array('req' => FALSE, 'width' => 10, 'desc' => "Site information where the accession for the phenotyping is planted. It should match 'site_name' in the 'Site' sheet."),
       'evaluator'       => array('req' => FALSE, 'width' => 15, 'desc' => "Person who did the phenotyping. It should match 'contact_name' of the Contact sheet."),
-      'clone_id'        => array('req' => FALSE, 'width' => 10, 'desc' => "ID of a spefic clone if available (eg. individual tree)."),
+      'clone_id'        => array('req' => FALSE, 'width' => 10, 'desc' => "ID of a specific clone if available (eg. individual tree)."),
       'rootstock'       => array('req' => FALSE, 'width' => 10, 'desc' => "Name of the rootstock if the plant is grafted to a rootstock. It should match an 'accession' column of the 'Accession' sheet."),
       'plant_date'      => array('req' => FALSE, 'width' => 10, 'desc' => "Date of the planting."),
       'data_year'       => array('req' => FALSE, 'width' => 10, 'desc' => "Phenotyping date if only year is known."),

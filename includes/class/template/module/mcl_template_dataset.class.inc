@@ -39,7 +39,7 @@ class MCL_TEMPLATE_DATASET extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'          => array('req' => TRUE,  'width' => 20, 'desc' => "Names of the datasets."),
+      'dataset_name'          => array('req' => TRUE,  'width' => 20, 'desc' => "Names of the datasets (projects)."),
       'type'                  => array('req' => TRUE,  'width' => 12, 'desc' => "Breeding, growing (for cultivar performance data), diversity (for study of genetic diversity) or QTL."),
       'sub_type'              => array('req' => FALSE, 'width' => 12, 'desc' => "To specify whether the markers used were SSR or SNP when the dataset is SSR or SNP genotyping data."),
       'super_dataset'         => array('req' => FALSE, 'width' => 16, 'desc' => "Larger dataset that this sub_dataset belngs to."),

@@ -39,7 +39,7 @@ class MCL_TEMPLATE_HAPLOTYPE_EFFECT extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'  => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
+      'dataset_name'  => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset (project). It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'marker_name'   => array('req' => TRUE,  'width' => 10, 'desc' => "Name of marker (QTL/MTL)."),
       'mean'          => array('req' => TRUE,  'width' => 10, 'desc' => ""),
       'std'           => array('req' => TRUE,  'width' => 10, 'desc' => ""),

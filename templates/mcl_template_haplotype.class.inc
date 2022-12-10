@@ -39,7 +39,7 @@ class MCL_TEMPLATE_HAPLOTYPE extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
+      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset (project). It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'stock_name'      => array('req' => TRUE,  'width' => 10, 'desc' => "ID of the stock that has been phenotyped. It should match a 'stock_name' column entry in the 'Stock' sheet or 'progeny_name' column entry 'Progeny' sheet."),
       'genus'           => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the stock."),
       'species'         => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the stock."),

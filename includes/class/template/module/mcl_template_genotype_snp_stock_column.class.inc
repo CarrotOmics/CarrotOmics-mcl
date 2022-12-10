@@ -43,7 +43,7 @@ class MCL_TEMPLATE_GENOTYPE_SNP_STOCK_COLUMN extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'  => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset. It should match a dataset_name in 'Dataset' sheet."),
+      'dataset_name'  => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset (project). It should match a dataset_name in 'Dataset' sheet."),
       'marker_name'   => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the marker genotyped. It should match an 'marker_name' of the 'Marker' sheet."),
       'genus'         => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the marker"),
       'species'       => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the marker"),

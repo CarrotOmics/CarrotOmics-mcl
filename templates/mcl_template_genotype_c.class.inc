@@ -39,7 +39,7 @@ class MCL_TEMPLATE_GENOTYPE_C extends MCL_TEMPLATE {
    */
   public function defineHeaders() {
     $headers = array(
-      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset. It should match a dataset_name in 'Dataset' sheet."),
+      'dataset_name'    => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the genotyping dataset (project). It should match a dataset_name in 'Dataset' sheet."),
       'stock_name'      => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the stock genotyped. It should match a 'stock_name' of the 'Stock' sheet."),
       'genus'           => array('req' => TRUE,  'width' => 10, 'desc' => "Genus of the stock"),
       'species'         => array('req' => TRUE,  'width' => 10, 'desc' => "Species of the stock"),
