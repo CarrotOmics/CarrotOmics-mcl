@@ -1,0 +1,10 @@
+8656113	Affx-88809176	Fragaria	iinumae	Fragaria	iinumae
+9906270	Affx-88809176	Fragaria	x ananassa	Fragaria	iinumae
+8656115	Affx-88809213	Fragaria	iinumae	Fragaria	iinumae
+9908257	Affx-88809213	Fragaria	x ananassa	Fragaria	iinumae
+8656117	Affx-88809214	Fragaria	iinumae	Fragaria	iinumae
+9908258	Affx-88809214	Fragaria	x ananassa	Fragaria	iinumae
+8656119	Affx-88809215	Fragaria	iinumae	Fragaria	iinumae
+9906257	Affx-88809215	Fragaria	x ananassa	Fragaria	iinumae
+8656121	Affx-88809223	Fragaria	iinumae	Fragaria	iinumae
+9908271	Affx-88809223	Fragaria	x ananassa	Fragaria	iinumae

@@ -691,28 +691,26 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
    */
   private function _convertExcel2CSV($filepath) {
 
-    // Includes PHPExcel libararies.
-    $lib_path = 'sites/all/libraries';
-    require_once("$lib_path/PHPExcel/PHPExcel.php");
-    require_once("$lib_path/PHPExcel/PHPExcel/IOFactory.php");
+    // PhpSpreadsheet dependencies and module, shared with excel/mcl_excel.class.inc
+    require_once(dirname(__FILE__).'/../phpspreadsheet.php');
 
     // Sets the line ending.
     $line_ending = '&&&&&';
 
     // Gets Excel file type [Excel5 | ].
-    $file_type = PHPExcel_IOFactory::identify($filepath);
+    $file_type = \PhpOffice\PhpSpreadsheet\IOFactory::identify($filepath);
 
     // Gets the default precision.
     $def_precision = ini_get('precision');
 
     // Read input Excel file.
-    $reader = PHPExcel_IOFactory::createReader($file_type);
+    $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($file_type);
     $reader->setReadDataOnly(false);
     $excel = $reader->load($filepath);
     $num_sheets = $excel->getSheetCount();
     print "\tExcel has $num_sheets sheets\n\n";
 
-    // Re-set the precision. It seems that PHPExcel change the precision.
+    // Re-set the precision. It seems that PHPExcel changed the precision, keep just in case.
     ini_set('precision', $def_precision);
 
     // Empties CSV folder.
@@ -726,7 +724,7 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
     }
 
     // Save each sheet as CSV file.
-    $writer = PHPExcel_IOFactory::createWriter($excel, 'CSV');
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Csv');
     $dup_templates = array();
     for ($i = 0; $i < $num_sheets; $i++) {
       $this->setProgress("Copying a worksheet... [".($i+1)." of $num_sheets worksheets]");
@@ -861,7 +859,7 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
     $sheet_data   = $excel->getActiveSheet();
     $max_row      = $sheet_data->getHighestRow();
     $max_col      = $sheet_data->getHighestColumn();
-    $max_col_idx  = PHPExcel_Cell::columnIndexFromString($max_col);
+    $max_col_idx  = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($max_col);
     $row_char     = 'A';
     for ($row = 1; $row <= $max_row; $row++) {
       $row_values = '';
@@ -873,7 +871,7 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
         // Updates the value.
         $row_values .= trim($value);
         if ($type == 'b') {
-          $cell->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
+          $cell->setDataType(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
           $bool = ($value) ? 'TRUE' : 'FALSE';
           $cell->setValue($bool);
         }
@@ -881,8 +879,8 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
           $value = $cell->getCalculatedValue();
           $cell->setValue($value);
         }
-        else if (PHPExcel_Shared_Date::isDateTime($cell)) {
-          $cell->getStyle()->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_GENERAL);
+        else if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+          $cell->getStyle()->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
           if (preg_match("/^\d{5,}$/", $value)) {
             $date_value = mcl_format_date($value, "m/d/Y");
             $cell->setValue($date_value);
@@ -893,8 +891,8 @@ class MCL_JOB_UPLOAD extends MCL_JOB {
         }
         else {
           // Sets the format of the rest of cell to be 'General'.
-          $cell->getStyle()->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_GENERAL);
-          //$sheet_data->getStyle($row_char.$col)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_GENERAL);
+          $cell->getStyle()->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
+          //$sheet_data->getStyle($row_char.$col)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_GENERAL);
         }
       }
       $row_char++;

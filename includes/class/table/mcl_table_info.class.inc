@@ -47,7 +47,7 @@ class MCL_TABLE_INFO {
       exit;
     }
 
-    // Gets all the table name from the table file.
+    // Gets all the table names from the table file.
     $tables = array();
     while (!feof($fdr)) {
       $line = trim(fgets($fdr));
@@ -186,7 +186,7 @@ class MCL_TABLE_INFO {
     $warn = '';
     foreach ($tables as $table_name => $info) {
       if (!$info['EXISTS']) {
-        $warn .= "    >$table_name does not exists\n";
+        $warn .= "    >$table_name does not exist\n";
       }
     }
     if ($warn) {

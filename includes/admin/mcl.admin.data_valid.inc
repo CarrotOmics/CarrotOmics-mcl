@@ -286,7 +286,7 @@ function mcl_admin_data_valid_form_validate($form, &$form_state) {
       if ($data_valid_type->getType() == 'trait_category') {
         $cvterm_tc = MCL_CHADO_CVTERM::getCvterm('SITE_CV', 'trait_category');
         if (!$cvterm_tc) {
-          form_set_error("data_valid][$id_fieldset][$id_value", "The cvterm ('trait_category') does not exists in chado.cvterm table. Please add it.");
+          form_set_error("data_valid][$id_fieldset][$id_value", "The cvterm ('trait_category') does not exist in chado.cvterm table. Please add it.");
           return;
         }
       }

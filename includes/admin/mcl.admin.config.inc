@@ -45,22 +45,13 @@ function mcl_admin_config_form($form, &$form_state) {
     '#default_value'  => mcl_get_config_setting('mcl_working_dir'),
   );
 
-  // PHPZip Library directory.
-  $form['mcl_vars']['mcl_lib_phpzip_dir'] = array(
-    '#title'          => t('PHPZip Library Directory'),
+  // Library directory.
+  $form['mcl_vars']['mcl_lib_dir'] = array(
+    '#title'          => t('Library Directory'),
     '#type'           => t('textfield'),
-    '#description'    => t("Please specify the library directory for PHPZip."),
+    '#description'    => t("Please specify the library directory."),
     '#required'       => TRUE,
-    '#default_value'  => mcl_get_config_setting('mcl_lib_phpzip_dir'),
-  );
-
-  // PHPExcel Library directory.
-  $form['mcl_vars']['mcl_lib_phpexcel_dir'] = array(
-    '#title'          => t('PHPExcel Library Directory'),
-    '#type'           => t('textfield'),
-    '#description'    => t("Please specify the library directory of PHPExcel."),
-    '#required'       => TRUE,
-    '#default_value'  => mcl_get_config_setting('mcl_lib_phpexcel_dir'),
+    '#default_value'  => mcl_get_config_setting('mcl_lib_dir'),
   );
 
   // Drush binary.
@@ -82,26 +73,19 @@ function mcl_admin_config_form($form, &$form_state) {
 function mcl_admin_config_form_validate($form, &$form_state) {
 
   // Gets variables.
-  $mcl_working_dir      = trim($form_state['values']['mcl_working_dir']);
-  $mcl_lib_phpzip_dir   = trim($form_state['values']['mcl_lib_phpzip_dir']);
-  $mcl_lib_phpexcel_dir = trim($form_state['values']['mcl_lib_phpexcel_dir']);
-  $mcl_drush_binary     = trim($form_state['values']['mcl_drush_binary']);
+  $mcl_working_dir = trim($form_state['values']['mcl_working_dir']);
+  $mcl_lib_dir = trim($form_state['values']['mcl_lib_dir']);
+  $mcl_drush_binary = trim($form_state['values']['mcl_drush_binary']);
 
   // Checks the working directory.
   if (!is_writable($mcl_working_dir)) {
-    form_set_error('mcl_vars][mcl_working_dir', t("The working directory, $mcl_working_dir, does not exists or is not writeable by the web server."));
+    form_set_error('mcl_vars][mcl_working_dir', t("The working directory, $mcl_working_dir, does not exist or is not writeable by the web server."));
     return;
   }
 
-  // Checks the PHPZip library directory.
-  if (!file_exists($mcl_lib_phpzip_dir)) {
-    form_set_error('mcl_vars][mcl_working_dir', t("PHPZip library directory, $mcl_lib_phpzip_dir, does not exists."));
-    return;
-  }
-
-  // Checks the PHPExcel library directory.
-  if (!file_exists($mcl_lib_phpexcel_dir)) {
-    form_set_error('mcl_vars][mcl_working_dir', t("PHPExcel library directory, $mcl_lib_phpexcel_dir, does not exists."));
+  // Checks the library directory.
+  if (!file_exists($mcl_lib_dir)) {
+    form_set_error('mcl_vars][mcl_working_dir', t("Library directory \"$mcl_lib_dir\" does not exist."));
     return;
   }
 
@@ -113,7 +97,6 @@ function mcl_admin_config_form_validate($form, &$form_state) {
 
   // Updates variables.
   variable_set('mcl_working_dir', $mcl_working_dir);
-  variable_set('mcl_lib_phpzip_dir', $mcl_lib_phpzip_dir);
-  variable_set('mcl_lib_phpexcel_dir', $mcl_lib_phpexcel_dir);
+  variable_set('mcl_lib_dir', $mcl_lib_dir);
   variable_set('mcl_drush_binary', $mcl_drush_binary);
 }

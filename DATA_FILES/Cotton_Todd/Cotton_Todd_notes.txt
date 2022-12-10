@@ -1,0 +1,37 @@
+================================================
+> Notes for 
+------------------------------------------------
+
+==================================
+> Todd - 002
+GIN1 (numeric) : the value (#VALUE!) must be numeric at row 2670
+GIN1 (numeric) : the value (#VALUE!) must be numeric at row 2672
+GIN1 (numeric) : the value (#VALUE!) must be numeric at row 2673
+GIN1 (numeric) : the value (#VALUE!) must be numeric at row 2795
+GIN1 (numeric) : the value (#VALUE!) must be numeric at row 2883
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4398
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4399
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4400
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4401
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4402
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4403
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4404
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4405
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4406
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4407
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4408
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4409
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4410
+GIN1 (numeric) : the value (#DIV/0!) must be numeric at row 4411
+TOT_SEL (numeric) : the value (X) => -1
+> Todd - 003
+LINT YLD (numeric) : the value (#REF!) must be numeric 
+LINT YLD (numeric) : the value (#VALUE!) must be numeric
+LINT YLD (numeric) : the value (#DIV/0!) must be numeric
+Uhm_mm (numeric) : the value (#VALUE!) must be numeric
+str_kg (numeric) : the value (#VALUE!) must be numeric
+GIN2 (percent) : the value (#VALUE!) must be numeric
+GIN2 (percent) : the value (#DIV/0!) must be numeric
+
+GIN2 (percent) : the value (117.64705882353) must be between 0 and 100 at row 3394
+GIN2 (percent) : the value (117.64705882353) must be between 0 and 100 at row 3394

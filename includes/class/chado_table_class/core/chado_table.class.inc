@@ -1137,7 +1137,7 @@ class CHADO_TABLE  {
 
     // Checks the table. If the table does not exist, log and return TRUE.
     if (!db_table_exists($chado_table)) {
-      $msg = "The table '$chado_table' does not exists";
+      $msg = "The table '$chado_table' does not exist";
       $dummy = ($mcl_tmpl) ? $mcl_tmpl->updateMsg('L', $msg) : mcl_print($msg, 1, 3, '', FALSE);
       return TRUE;
     }
@@ -1380,7 +1380,7 @@ class CHADO_TABLE  {
 
     // Checks the table. If the table does not exist, log and return TRUE.
     if (!db_table_exists($chado_table)) {
-      $msg = "The table '$chado_table' does not exists";
+      $msg = "The table '$chado_table' does not exist";
       $dummy = ($mcl_tmpl) ? $mcl_tmpl->updateMsg('L', $msg) : mcl_print($msg, 1, 3, '', FALSE);
       return TRUE;
     }

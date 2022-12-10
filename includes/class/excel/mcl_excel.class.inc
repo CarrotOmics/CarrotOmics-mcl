@@ -3,12 +3,9 @@
  * The declaration of MCL_EXCEL class.
  *
  */
-$lib_path_phpzip    = mcl_get_config_setting('mcl_lib_phpzip_dir');
-$lib_path_phpexcel  = mcl_get_config_setting('mcl_lib_phpexcel_dir');
-require_once("$lib_path_phpzip/zip.lib.php");
-require_once("$lib_path_phpexcel/PHPExcel.php");
-require_once("$lib_path_phpexcel/PHPExcel/Writer/Excel2007.php");
-require_once("$lib_path_phpexcel/PHPExcel/IOFactory.php");
+
+// PhpSpreadsheet dependencies and module, shared with job/mcl_job_upload.class.inc
+require_once(dirname(__FILE__).'/../phpspreadsheet.php');
 
 class MCL_EXCEL {
 
@@ -28,7 +25,7 @@ class MCL_EXCEL {
   /*
    * Version
    *
-   * This version of class supports ('Excel2007' and 'Excel5')
+   * This version of class supports ('Xlsx' and 'Xls')
    */
   private $version = NULL;
 
@@ -74,16 +71,16 @@ class MCL_EXCEL {
 
     // Sets the default version.
     if (!$this->version) {
-      $this->version = 'Excel2007';
+      $this->version = 'Xlsx';
     }
 
     // Gets the default precision.
     $def_precision = ini_get('precision');
 
-    // Creates new PHPExcel object.
-    $this->excel = new PHPExcel();
+    // Creates new PhpSpreadsheet object.
+    $this->excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
-    // Re-set the precision. It seems that PHPExcel change the precision.
+    // Re-set the precision. It seems that PHPExcel changed the precision, keep just in case.
     ini_set('precision', $def_precision);
 
     // Sets the properties of an Excel file.
@@ -166,7 +163,7 @@ class MCL_EXCEL {
       header("Content-Disposition: attachment;filename=" . $this->filename);
       header('Cache-Control: max-age=0');
       $this->excel->setActiveSheetIndex(0);
-      $objWriter = PHPExcel_IOFactory::createWriter($this->excel, $this->version);
+      $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this->excel, $this->version);
       ob_end_clean();
       $objWriter->save('php://output');
       exit;
@@ -175,7 +172,7 @@ class MCL_EXCEL {
 
       // Saves the excel file
       $this->excel->setActiveSheetIndex(0);
-      $objWriter = PHPExcel_IOFactory::createWriter($this->excel, $this->version);
+      $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this->excel, $this->version);
       $objWriter->save($this->filepath);
       return TRUE;
     }
@@ -200,8 +197,8 @@ class MCL_EXCEL {
       if (array_key_exists('url', $cell)) {
 
         // Adds an underline and sets the color for the link.
-        $this->excel->getActiveSheet()->getStyle($col_chr.$row_no)->getFont()->setColor(new PHPExcel_Style_Color( PHPExcel_Style_Color::COLOR_DARKBLUE ));
-        $this->excel->getStyle($loc)->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
+        $this->excel->getActiveSheet()->getStyle($col_chr.$row_no)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color( PhpSpreadsheet_Style_Color::COLOR_DARKBLUE ));
+        $this->excel->getStyle($loc)->getFont()->setUnderline(\PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE);
 
         // Sets URL.
         $this->excel->getCell($loc)->getHyperlink()->setUrl($cell['url']);
@@ -217,7 +214,7 @@ class MCL_EXCEL {
   public function createFromCSV($csv_files) {
 
     // Creates reader for reading CSV file.
-    $reader = PHPExcel_IOFactory::createReader('CSV');
+    $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader('Csv');
 
     // Creates Excel sheets.
     $idx = 0;
@@ -271,7 +268,7 @@ class MCL_EXCEL {
     }
 
     // Saves them to the Excel file.
-    $writer = PHPExcel_IOFactory::createWriter($this->excel, 'Excel2007');
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this->excel, 'Xlsx');
     $writer->save($this->filepath);
     return TRUE;
   }
@@ -321,7 +318,7 @@ class MCL_EXCEL {
         $this->excel->getActiveSheet()->getColumnDimension($col_chr)->setWidth($arr['width']);
       }
       $this->excel->getActiveSheet()->getStyle($col_chr.'1')->getFont()->setBold(true);
-      $this->excel->getActiveSheet()->getStyle($col_chr.'1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+      $this->excel->getActiveSheet()->getStyle($col_chr.'1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
       $this->excel->getActiveSheet()->getStyle($col_chr.'1')->getFill()->getStartColor()->setARGB('FFCECECE');
     }
   }

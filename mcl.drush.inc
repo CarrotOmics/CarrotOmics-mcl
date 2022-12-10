@@ -558,7 +558,7 @@ function drush_mcl_check_chado() {
   // Checks Chado schema.
   mcl_check_schema('chado');
 
-  // Gets all the table from information_schema table.
+  // Gets all the tables from information_schema table.
   $all_tables = mcl_get_all_tables('chado');
   if (empty($all_tables)) {
     mcl_print("Error : There no table exists in Chado schema", 1, 3);
@@ -1116,7 +1116,7 @@ function drush_mcl_add_cvterm_by_template($template_name, $cv_name = 'SITE_CV') 
   // Checks the name of template.
   $mcl_template = MCL_TEMPLATE::getByTemplate($template_name);
   if (!$mcl_template) {
-    mcl_print("Error : The template '$template_name' does not exists", 1, 2.3);
+    mcl_print("Error : The template '$template_name' does not exist", 1, 2.3);
     exit;
   }
 

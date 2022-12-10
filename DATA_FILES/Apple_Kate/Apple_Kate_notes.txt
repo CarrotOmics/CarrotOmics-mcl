@@ -1,0 +1,30 @@
+================================================
+> Notes for 
+------------------------------------------------
+
+> Apple KE
+ScarlettOHara => Coop25
+wijick =>  Wijcik
+jonathon => Jonathan
+
+rootstock
+enable property_bims
+- cross missing (added)
+0000
+0043
+0049
+0133
+0542
+1156
+9628
+9549
+9828
+-- phenotype
+move 'evaluator' column
+disabled 'Browning', 'BP' columns due to too many errors.
+
+-- accession sheet
+added 'Emala9' as rootstock. Make sure 'Emala9' and 'EMLA9' are different.
+added 'M111' as rootstock. 
+-- missing accession/progeney
+cv12-15b-115-0402

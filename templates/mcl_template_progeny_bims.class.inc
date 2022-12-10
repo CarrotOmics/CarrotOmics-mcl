@@ -146,7 +146,7 @@ class MCL_TEMPLATE_PROGENY_BIMS extends MCL_TEMPLATE {
         $GLOBALS['progeny_bims'][$cross_number]['progenies'][] = $stock_id;
       }
 
-      // The cross does not exists in database and cross sheet.
+      // The cross does not exist in database and cross sheet.
       else {
         $this->updateMsg('E', " The cross number '$cross_number' cannot be found in the database nor Cross sheet.");
       }

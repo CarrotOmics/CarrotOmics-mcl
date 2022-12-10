@@ -1,0 +1,5 @@
+trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
+mcl_height,numeric,,,,cM,,TRUE,1
+mcl_color,categorical,,,,Color,Red/Orange/Yellow/Green/Blue/Purple/White/Black/Brown/Cyan/Magenta/Gray,TRUE,2
+mcl_pH,numeric,,,,pH,,TRUE,2
+mcl_pH4,numeric,,,,pH4,,TRUE,2

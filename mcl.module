@@ -418,13 +418,9 @@ function mcl_get_config_setting($setting) {
       $default_mcl_working_url = realpath('./') . '/' .  variable_get('file_public_path', conf_path() . '/files') . '/mcl/working';
       return variable_get('mcl_working_url', $default_mcl_working_url);
       break;
-    case 'mcl_lib_phpzip_dir':
-      $default_mcl_lib_phpzip_dir = realpath('./') . '/' . '/sites/all/libraries/PHPZip';
-      return variable_get('mcl_lib_phpzip_dir', $default_mcl_lib_phpzip_dir);
-      break;
-    case 'mcl_lib_phpexcel_dir':
-      $default_mcl_lib_phpexcel_dir = realpath('./') . '/' . '/sites/all/libraries/PHPExcel';
-      return variable_get('mcl_lib_phpexcel_dir', $default_mcl_lib_phpexcel_dir);
+    case 'mcl_lib_dir':
+      $default_mcl_lib_dir = realpath('./') . '/' . '/sites/all/libraries';
+      return variable_get('mcl_lib_dir', $default_mcl_lib_dir);
       break;
     case 'mcl_drush_binary':
       return variable_get('mcl_drush_binary', '/usr/local/drush/drush');
@@ -533,7 +529,7 @@ function mcl_download_template_excel($args) {
 
   // Gets parameters.
   $template_id = array_key_exists('template_id', $args) ? $args['template_id'] : '';
-  $version     = array_key_exists('version', $args)     ? $args['version']     : 'Excel2007';
+  $version     = array_key_exists('version', $args)     ? $args['version']     : 'Xlsx';
   $type        = array_key_exists('type', $args)        ? $args['type']        : 'online';
   $filepath    = array_key_exists('filepath', $args)    ? $args['filepath']    : '';
 
@@ -686,7 +682,7 @@ function _mcl_mail_upload_complete(&$message, $params) {
  */
 function mcl_check_setup() {
 
-  // Checks PHPExcel library.
+  // Checks PhpSpreadsheet library.
   // Checks PHPZip library.
 
   $issues = '';

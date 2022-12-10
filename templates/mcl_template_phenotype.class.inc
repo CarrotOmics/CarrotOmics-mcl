@@ -101,9 +101,9 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     $cvterms['SITE_CV']['comments']                 = -1;
     $cvterms['SITE_CV']['source']                   = -1;
     $cvterms['SITE_CV']['previous_entry']           = -1;
-    $cvterms['BIMS_FIELD_BOOK']['unique_id']        = -1;
-    $cvterms['BIMS_FIELD_BOOK']['primary_order']    = -1;
-    $cvterms['BIMS_FIELD_BOOK']['secondary_order']  = -1;
+//    $cvterms['BIMS_FIELD_BOOK']['unique_id']        = -1;
+//    $cvterms['BIMS_FIELD_BOOK']['primary_order']    = -1;
+//    $cvterms['BIMS_FIELD_BOOK']['secondary_order']  = -1;
     return $cvterms;
   }
 
@@ -216,9 +216,9 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
       $sample->addProp($this, 'SITE_CV', 'fiber_pkg', $line['fiber_pkg']);
       $sample->addProp($this, 'SITE_CV', 'storage_regime', $line['storage_regime']);
       $sample->addProp($this, 'SITE_CV', 'comments', $line['comments']);
-      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'unique_id', $unique_id);
-      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'primary_order', $primary_order);
-      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'secondary_order', $secondary_order);
+//      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'unique_id', $unique_id);
+//      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'primary_order', $primary_order);
+//      $sample->addProp($this, 'BIMS_FIELD_BOOK', 'secondary_order', $secondary_order);
 
       // Adds user-specific properties.
       $this->addSpecialColumns('##', $sample, $line);

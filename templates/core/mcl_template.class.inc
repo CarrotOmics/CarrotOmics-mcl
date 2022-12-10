@@ -344,7 +344,7 @@ DESC;
     $class_loader = new MCL_CLASS_LOADER();
     $template_dir = $class_loader->getTemplatePath();
 
-    // Scans the template folder and adds new template if not exists in
+    // Scans the template folder and adds new template if it does not exist in
     // mcl_template table.
     $files = file_scan_directory($template_dir, "/\.inc$/");
     $template_class = array();
@@ -1070,8 +1070,8 @@ DESC;
           // Checks header name for duplication.
           if (array_key_exists($column_name, $header_dup_arr)) {
             $dup_column       = $header_dup_arr[$column_name];
-            $char_dup_column  = PHPExcel_Cell::stringFromColumnIndex($dup_column);
-            $char_i           = PHPExcel_Cell::stringFromColumnIndex($i);
+            $char_dup_column  = PhpSpreadsheet_Cell::stringFromColumnIndex($dup_column);
+            $char_i           = PhpSpreadsheet_Cell::stringFromColumnIndex($i);
             $label            = $this->getLabel($column_name);
             $this->updateMsg('E', "Duplicated header : Found duplicated header '$label' at column $char_dup_column and $char_i. Please removed either one.");
           }
@@ -1085,7 +1085,7 @@ DESC;
         foreach ($headers as $column => $prop) {
           if ($prop['req'] && (!array_key_exists('col', $prop) || $prop['col'] < 0)) {
             $label = $this->getLabel($column);
-            $this->updateMsg('E', "Error : Required column [$label] does not exists.");
+            $this->updateMsg('E', "Error : Required column [$label] does not exist.");
           }
         }
       }

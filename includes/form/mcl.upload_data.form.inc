@@ -35,6 +35,9 @@ function mcl_upload_data_form($form, &$form_state) {
   }
   else {
 
+    // Adds the add form.
+    _mcl_get_add_job_form($form, $mcl_user);  // Order changed from original MCL
+
     // Upload Data.
     $desc = "MCL data uploading phases.<br /><br />
     <p>Phase 1 : checks entry errors.<br />
@@ -67,9 +70,6 @@ function mcl_upload_data_form($form, &$form_state) {
     $form['job_list']['job_table'] = array(
       '#markup' => _mcl_get_uploading_job_table(),
     );
-
-    // Adds the add form.
-    _mcl_get_add_job_form($form, $mcl_user);
   }
 
   $form['home_link'] = array(
@@ -211,7 +211,7 @@ function _mcl_get_add_job_form(&$form, MCL_USER $mcl_user) {
   );
   $form['add_upload_job']['advanced'] = array(
     '#type'         => 'fieldset',
-    '#collapsed'    => TRUE,
+    '#collapsed'    => FALSE, // Default changed from original MCL
     '#collapsible'  => TRUE,
     '#title'        => 'Advanced options',
     '#attributes'   => array('style' => 'width:100%;'),
@@ -224,6 +224,7 @@ function _mcl_get_add_job_form(&$form, MCL_USER $mcl_user) {
     '#type'         => 'textarea',
     '#rows'         => 4,
     '#attributes'   => array('style' => 'width:100%;'),
+    '#value'        => 'cv::carrotomics_trait_ontology', // Default changed from original MCL
     '#description'  => "Please provide job parameters.",
   );
   $form['add_upload_job']['advanced']['no_transaction_cb'] = array(

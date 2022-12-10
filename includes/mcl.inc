@@ -53,7 +53,7 @@ function mcl_exist_schema($schema) {
 }
 
 /**
- * Returns the all the table in the schema. The inforamtion is stored in
+ * Returns the all the tables in the schema. The information is stored in
  * information_schema.tables table.
  *
  * @param string $schema
@@ -362,6 +362,15 @@ function mcl_print($msg, $indent = 0, $line_feed = 0.1, $period_flag = TRUE) {
   if ($GLOBALS['verbose']) {
     print $nl_before . $space . $msg . $period . $nl_after;
   }
+
+  // CarrotOmics addition, always log this output to an accessible file location
+  $path = '/tmp';
+  if (is_dir('/local/sites/www.carrotomics.org')) {
+    $path = '/local/sites/www.carrotomics.org';
+  }
+  $fp = fopen($path . '/mcl.log', 'a');
+  fwrite($fp, $nl_before . $space . $msg . $period . $nl_after );
+  fclose($fp);
 }
 
 /**
