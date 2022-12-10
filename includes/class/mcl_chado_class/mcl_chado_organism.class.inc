@@ -129,6 +129,11 @@ class MCL_CHADO_ORGANISM extends CHADO_ORGANISM {
    */
   public static function checkOrganismInfra(MCL_TEMPLATE $mcl_tmpl = NULL, $genus, $species, $infraspecific_type = NULL, $infraspecific_name = NULL, $separator = '', $warning = FALSE) {
     $flag = TRUE;
+    // If $warning is true, we can allow null for the organism, e.g. will look it up from
+    // stock instead, and silently return success in this case.
+    if (!$genus and !$species and $warning) {
+      return $flag;
+    }
     if ($genus xor $species) {
       self::updateMsg($mcl_tmpl, 'E', "Either of genus or species must not be an empty.");
       $flag = FALSE;

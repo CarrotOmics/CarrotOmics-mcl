@@ -41,8 +41,8 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     $headers = array(
       'dataset_name'      => array('req' => TRUE,  'width' => 10, 'desc' => "Name of the phenotyping dataset. It should match a 'dataset_name' column entry in the 'Dataset' sheet."),
       'stock_name'        => array('req' => TRUE,  'width' => 10, 'desc' => "ID of the stock that has been phenotyped. It should match a 'stock_name' column entry in the 'Stock' sheet or 'progeny_name' column entry 'Progeny' sheet."),
-      'genus'             => array('req' => TRUE,  'width' => 10, 'desc' => "Genus of the stock"),
-      'species'           => array('req' => TRUE,  'width' => 10, 'desc' => "Species of the stock"),
+      'genus'             => array('req' => FALSE, 'width' => 10, 'desc' => "Genus of the stock"),
+      'species'           => array('req' => FALSE, 'width' => 10, 'desc' => "Species of the stock"),
       'infraspecific_type' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific type of the stock as defined in the taxonomic_rank CV"),
       'infraspecific_name' => array('req' => FALSE,'width' => 10, 'desc' => "Infraspecific name of the stock"),
       'sample_id'         => array('req' => TRUE,  'width' => 10, 'desc' => "The ID of the smallest sample or sub-sample that was tested (Each row should have unique sample_ID). If there is no unique sample ID, users can concatenate a set of columns that gives a unique phenotypic value and those columns become required fields. For example, if a combination of dataset_name, ID, phenotyping_date is unique for the specific phenotype, those three can be concatenated with '_' in between."),
@@ -115,8 +115,8 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     // Checks dataset.
     MCL_CHADO_DATASET::checkDataset($this, $line['dataset_name']);
 
-    // Checks organisms.
-    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
+    // Checks organisms. Can be blank, in which case lookup organism from stock, so set $warning flag to true in this case.
+    MCL_CHADO_ORGANISM::checkOrganismInfra($this, $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name'], '', TRUE);
 
     // Checks stock.
     MCL_CHADO_STOCK::checkStockInfra($this, $line['stock_name'], $line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
@@ -144,8 +144,12 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
       //return TRUE;
     }
 
-    // Gets the organism.
+    // Gets the organism. Can be left empty to get organism from the stock.
     $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
+    $organism_id = NULL;
+    if ($organism) {
+      $organism_id = $organism->getOrganismID();
+    }
 
     // Gets nd_geolocation_id.
     $nd_geolocation_id = MCL_CHADO_LOCATION::getLocationIDBySite($line['site_name']);
@@ -160,22 +164,28 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     $secondary_order  = (array_key_exists('secondary_order', $line) && !$line['secondary_order']) ? $line['secondary_order'] : '1';
 
     // Gets the stock.
-    $args = array(
-      'uniquename' => $line['stock_name'],
-      'organism_id' => $organism->getOrganismID(),
-    );
+    $args = [];
+    $args['uniquename'] = $line['stock_name'];
+    if ($organism_id) {
+      $args['organism_id'] = $organism_id;
+    }
     $stock = MCL_CHADO_STOCK::byKey($args);
     if ($stock) {
 
+      // When organism is not specifiec, we get it from the stock.
+      if (!$organism_id) {
+        $organism_id = $stock->getOrganismID();
+      }
+
       // Adds sample.
       $sample_uniquename  = sprintf("%d.%d.%d.%d.%s.%s.%s", $project_id, $nd_geolocation_id, $contact_id, $stock->getStockID(), $unique_id, $primary_order, $secondary_order);
-      $sample = MCL_CHADO_STOCK::addStock($this, $sample_uniquename, $unique_id, $organism->getOrganismID(), $this->cvterms['SITE_CV']['sample']);
+      $sample = MCL_CHADO_STOCK::addStock($this, $sample_uniquename, $unique_id, $organism_id, $this->cvterms['SITE_CV']['sample']);
       if (!$sample) {
         return FALSE;
       }
 
       // Adds clone.
-      $clone = MCL_CHADO_STOCK::addStock($this, $line['clone_id'], $line['clone_id'], $organism->getOrganismID(), $this->cvterms['SITE_CV']['clone']);
+      $clone = MCL_CHADO_STOCK::addStock($this, $line['clone_id'], $line['clone_id'], $organism_id, $this->cvterms['SITE_CV']['clone']);
 
       // Adds relationships between stock, sample and clone.
       if ($clone) {

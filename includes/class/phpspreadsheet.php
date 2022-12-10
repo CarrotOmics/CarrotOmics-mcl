@@ -36,6 +36,7 @@ require_once("$lib_path/PhpSpreadsheet/Chart/DataSeries.php");
 require_once("$lib_path/PhpSpreadsheet/IComparable.php");
 require_once("$lib_path/PhpSpreadsheet/Style/Supervisor.php");
 require_once("$lib_path/PhpSpreadsheet/Shared/File.php");
+require_once("$lib_path/PhpSpreadsheet/Shared/JAMA/Matrix.php");
 require_once("$lib_path/PhpSpreadsheet/Shared/XMLWriter.php");
 require_once("$lib_path/PhpSpreadsheet/Writer/Exception.php");
 require_once("$lib_path/PhpSpreadsheet/Reader/Exception.php");
@@ -46,6 +47,7 @@ require_once("$lib_path/PhpSpreadsheet/Writer/Csv.php");
 require_once("$lib_path/PhpSpreadsheet/Writer/Xls.php");
 
 // Writer
+require_once("$lib_path/PhpSpreadsheet/Calculation/Token/Stack.php");
 require_once("$lib_path/PhpSpreadsheet/Calculation/Calculation.php");
 require_once("$lib_path/PhpSpreadsheet/Calculation/Functions.php");
 require_once("$lib_path/PhpSpreadsheet/HashTable.php");
