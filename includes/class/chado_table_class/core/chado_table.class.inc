@@ -250,6 +250,7 @@ class CHADO_TABLE  {
       'projectprop',
       'project_pub',
       'project_relationship',
+      'project_stock',
       'protocol',
       'protocolparam',
       'pub',

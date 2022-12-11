@@ -177,6 +177,12 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
         $organism_id = $stock->getOrganismID();
       }
 
+      // Adds link between stock and dataset (project).
+      $result = $stock->addProjectID($this, $project_id);
+      if (!$result) {
+        return FALSE;
+      }
+
       // Adds sample.
       $sample_uniquename  = sprintf("%d.%d.%d.%d.%s.%s.%s", $project_id, $nd_geolocation_id, $contact_id, $stock->getStockID(), $unique_id, $primary_order, $secondary_order);
       $sample = MCL_CHADO_STOCK::addStock($this, $sample_uniquename, $unique_id, $organism_id, $this->cvterms['SITE_CV']['sample']);

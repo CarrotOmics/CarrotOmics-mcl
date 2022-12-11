@@ -1407,4 +1407,62 @@ class MCL_CHADO_STOCK extends CHADO_STOCK {
       }
     }
   }
+
+  /**
+   * Adds project IDs to project_stock.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $project_id_list
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addProjectID(MCL_TEMPLATE $mcl_tmpl = NULL, $project_id_list, $separator = '') {
+    $flag = TRUE;
+    if ($project_id_list) {
+      $project_ids = preg_split($this->getSepRegex($separator), $project_id_list, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($project_ids as $project_id) {
+        $project_id = trim($project_id);
+        $project = MCL_CHADO_DATASET::byKey(array('project_id' => $project_id));
+        if ($project) {
+          if (!$this->addLink($mcl_tmpl, 'project_stock', 'stock_id', $this->stock_id, 'project_id', $project->getProjectID())) {
+            $flag = FALSE;
+          }
+        }
+        else {
+          $flag = FALSE;
+        }
+      }
+    }
+    return $flag;
+  }
+
+  /**
+   * Adds project to project_stock.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $project
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addProject(MCL_TEMPLATE $mcl_tmpl = NULL, $project, $separator = '') {
+    $flag = TRUE;
+    if ($project) {
+      $names = preg_split($this->getSepRegex($separator), $project, -1, PREG_SPLIT_NO_EMPTY);
+      foreach ($names as $name) {
+        $name = trim($name);
+        $project = MCL_CHADO_PROJECT::byName($name);
+        if ($project) {
+          if (!$this->addLink($mcl_tmpl, 'project_stock', 'stock_id', $this->stock_id, 'project_id', $project->getProjectID())) {
+            $flag = FALSE;
+          }
+        }
+        else {
+          $flag = FALSE;
+        }
+      }
+    }
+    return $flag;
+  }
 }
