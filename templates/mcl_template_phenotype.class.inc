@@ -147,7 +147,7 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
     // Gets the organism. Can be left empty to get organism from the stock.
     $organism = NULL;
     $organism_id = NULL;
-    if ($line['genus'] or line['species'] or $line['infraspecific_type'] or $line['infraspecific_name']) {
+    if ($line['genus'] or $line['species'] or $line['infraspecific_type'] or $line['infraspecific_name']) {
       $organism = MCL_CHADO_ORGANISM::getOrganismInfra($line['genus'], $line['species'], $line['infraspecific_type'], $line['infraspecific_name']);
       if ($organism) {
         $organism_id = $organism->getOrganismID();
