@@ -392,22 +392,23 @@ function mcl_upload_data_form_submit($form, &$form_state) {
 
         // Runs the job.
         $drush = mcl_get_config_setting('mcl_drush_binary');
-        $cmd = "$drush mcl-rerun-job $job_id \"$dest_filepath\" --move_input $opt_transaction > /dev/null 2>/dev/null  & ";
+        $log = $mcl_user->getUserDir() . '/mcl.drush.log';
+        $cmd = "$drush mcl-rerun-job $job_id \"$dest_filepath\" --move_input $opt_transaction >> \"$log\" 2>&1 & ";
         $pid = exec($cmd, $output, $return_var);
         if ($return_var) {
-          drupal_set_message("Failed o add an uploading job");
+          drupal_set_message("Failed to add an uploading job");
         }
       }
       else {
-        drupal_set_message("Failed o add an uploading job : Error on updating job property");
+        drupal_set_message("Failed to add an uploading job : Error on updating job property");
       }
     }
     else {
-      drupal_set_message("Failed o add an uploading job : Error on adding a file");
+      drupal_set_message("Failed to add an uploading job : Error on adding a file");
     }
   }
   else {
-    drupal_set_message("Failed o add an uploading job : Error on adding a job");
+    drupal_set_message("Failed to add an uploading job : Error on adding a job");
   }
 
   // Re-direct to "Data Uploading" page.
