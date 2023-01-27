@@ -1792,16 +1792,30 @@ DESC;
     foreach ((array)$line as $column => $value) {
       $regex = '/^' . $prefix . '[A-Za-z0-9\_]/';
       if (preg_match($regex, $column)) {
+        // Remove the prefix
         $cvterm_name = str_replace($prefix, '', $column);
 
-        // Gets the cvterm.
-        $cvterm = MCL_CHADO_CVTERM::getCvtermByCvID($cv_id, $cvterm_name);
-        if ($cvterm) {
-          $properties[$cvterm->getCvtermID()] = strtolower($cvterm->getName());
+        // Gets the cvterm. Use passed cv_id unless one is specified explicitly e.g. "cv::term"
+        $parts = [];
+        if (preg_match('/:/', $cvterm_name)) {
+          $parts = preg_split('/:+/', $cvterm_name, 2);
+          $cvterm = MCL_CHADO_CVTERM::getCvterm($parts[0], $parts[1]);
         }
         else {
-         // $this->updateMsg('E', "$cvterm_name (property) not found in cvterm");
-         // $flag = FALSE;
+          $cvterm = MCL_CHADO_CVTERM::getCvtermByCvID($cv_id, $cvterm_name);
+        }
+        if ($cvterm) {
+          // If we had an explicit prefix, we need to retain it for matching later.
+          if ($parts[0]) {
+            $properties[$cvterm->getCvtermID()] = strtolower($cvterm_name);
+          }
+          else {
+            $properties[$cvterm->getCvtermID()] = strtolower($cvterm->getName());
+          }
+        }
+        else {
+          $this->updateMsg('E', "cvterm name \"$cvterm_name\" (property) not found in cvterm for cv_id=$cv_id");
+          $flag = FALSE;
         }
       }
     }

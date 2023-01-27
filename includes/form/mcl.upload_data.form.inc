@@ -242,7 +242,7 @@ function _mcl_get_add_job_form(&$form, MCL_USER $mcl_user) {
   $form['add_upload_job']['start_btn'] = array(
     '#type'   => 'submit',
     '#name'   => 'start_btn',
-    '#value'  => 'Start a uploading job',
+    '#value'  => 'Start an uploading job',
   );
 }
 

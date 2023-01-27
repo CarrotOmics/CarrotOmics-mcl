@@ -2109,10 +2109,10 @@ function drush_mcl_submit_uploading_job($username, $filepath) {
   // Gets the job_name option.
   $job_name = drush_get_option('job_name');
 
-  // Prepares a uploading job.
+  // Prepares an uploading job.
   $mcl_job = mcl_prepare_uploading_job($mcl_user, $filepath, $working_dir, $job_name, FALSE);
   if ($mcl_job) {
-    mcl_print("Error : Failed to prepare a uploading job", 1, 3);
+    mcl_print("Error : Failed to prepare an uploading job", 1, 3);
     exit;
   }
 
@@ -2186,10 +2186,10 @@ function drush_mcl_upload_data($username, $filepath, $param_json = '') {
     }
   }
 
-  // Prepares a uploading job.
+  // Prepares an uploading job.
   $mcl_job = mcl_prepare_uploading_job($mcl_user, $filepath, $move_input, $trans, $working_dir, $job_name, $param);
   if (!$mcl_job) {
-    mcl_print("Error : Failed to prepare a uploading job", 1, 3);
+    mcl_print("Error : Failed to prepare an uploading job", 1, 3);
     exit;
   }
 
@@ -2228,7 +2228,7 @@ function drush_mcl_upload_data($username, $filepath, $param_json = '') {
 }
 
 /**
- * Prepares for a uploading job.
+ * Prepares for an uploading job.
  *
  * 1. Checks arguments.
  * 2. Copies an input file to job folder.
@@ -2259,7 +2259,7 @@ function mcl_prepare_uploading_job(MCL_USER $mcl_user, $filepath, $move_input, $
     $name = $job_name;
   }
 
-  // Prepares for a uploading job.
+  // Prepares for an uploading job.
   $transaction = db_transaction();
   try {
 

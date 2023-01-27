@@ -157,4 +157,132 @@ class MCL_CHADO_ANALYSIS extends CHADO_ANALYSIS {
     }
     return $af;
   }
+
+  /**
+   * Adds a property by type ID (cvterm ID).
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param integer $type_id
+   * @param string $value
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addPropByID(MCL_TEMPLATE $mcl_tmpl = NULL, $type_id, $value, $separator = '') {
+    if ($value != '') {
+      return $this->addProperty($mcl_tmpl, 'analysisprop', 'analysis_id', $this->analysis_id, $type_id, $value, $separator);
+    }
+    return TRUE;
+  }
+
+  /**
+   * Adds a property.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $cv_name
+   * @param string $cvterm_name
+   * @param string $value
+   * @param string $separator
+   *
+   * @return boolean
+   */
+  public function addProp(MCL_TEMPLATE $mcl_tmpl = NULL, $cv_name, $cvterm_name, $value, $separator = '') {
+    if ($value != '') {
+      $cvterm = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name);
+      if ($cvterm) {
+        $type_id = $cvterm->getCvtermID();
+        return $this->addProperty($mcl_tmpl, 'analysisprop', 'analysis_id', $this->analysis_id, $type_id, $value, $separator);
+      }
+    }
+    return TRUE;
+  }
+
+  /**
+   * Removes a property.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $cv_name
+   * @param string $cvterm_name
+   *
+   * @return boolean
+   */
+  public function removeProp(MCL_TEMPLATE $mcl_tmpl = NULL, $cv_name, $cvterm_name) {
+    $cvterm = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name);
+    if ($cvterm) {
+      $type_id = $cvterm->getCvtermID();
+      return $this->removeProperty($mcl_tmpl, 'analysisprop', 'analysis_id', $this->analysis_id, $type_id);
+    }
+    return TRUE;
+  }
+
+  /**
+   * Updates the property.
+   *
+   * @param MCL_TEMPLATE $mcl_tmpl
+   * @param string $cv_name
+   * @param string $cvterm_name
+   * @param string $value
+   * @param boolean $remove_flag
+   *
+   * @return boolean
+   */
+  public function updateProp(MCL_TEMPLATE $mcl_tmpl = NULL, $cv_name, $cvterm_name, $value, $remove_flag = FALSE) {
+
+    // Updates the property.
+    if ($value) {
+      $cvterm = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name);
+      if ($cvterm) {
+        $type_id = $cvterm->getCvtermID();
+        return $this->updateProperty($mcl_tmpl, 'analysisprop', 'analysis_id', $this->analysis_id, $type_id, $value);
+      }
+    }
+
+    // Removes the property.
+    else if ($remove_flag) {
+      return $this->removeProp($mcl_tmpl, $cv_name, $cvterm_name);
+    }
+    return TRUE;
+  }
+
+  /**
+   * Gets property.
+   *
+   * @param string $cv_name
+   * @param string $cvterm_name
+   *
+   * @return string
+   */
+  public function getProp($cv_name, $cvterm_name) {
+    $type_id = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name)->getCvtermID();
+    return $this->getProperty('analysisprop', 'analysis_id', $this->analysis_id, $type_id);
+  }
+
+  /**
+   * Retrieves the properties of the analysis.
+   *
+   * @param string $cv_name
+   * @param string $cvterm_name
+   * @param string $separator
+   *
+   * @return string
+   */
+  public function getProps($cv_name, $cvterm_name, $separator = ':') {
+    $type_id = MCL_CHADO_CVTERM::getCvterm($cv_name, $cvterm_name)->getCvtermID();
+    $sql = "
+      SELECT AP.value
+      FROM {chado.analysisprop} AP
+      WHERE AP.analysis_id = :analysis_id AND AP.type_id = :type_id
+    ";
+    $args = array(
+      ':type_id' => $type_id,
+      ':analysis_id' => $this->analysis_id,
+    );
+    $results = db_query($sql, $args);
+    $values = array();
+    while ($value = $results->fetchField()) {
+      $values []= $value;
+    }
+    return implode($separator, $values);
+  }
+
 }

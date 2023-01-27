@@ -46,7 +46,8 @@ class MCL_TEMPLATE_ANALYSIS extends MCL_TEMPLATE {
       'source_name'     => array('req' => FALSE, 'width' => 10, 'desc' => "Source name, e.g. cDNA, SwissProt (Maxium 255 charactrers)."),
       'source_version'  => array('req' => FALSE, 'width' => 10, 'desc' => "Source version (Maxium 255 charactrers)."),
       'description'     => array('req' => FALSE, 'width' => 10, 'desc' => "The description of the analysis."),
-      'timeexecuted'    => array('req' => FALSE, 'width' => 10, 'desc' => "Time of analysis execution. Use the format yyyy-mm-dd hh-mm-ss e.g. \"2001-02-03 04:05:06\". Leave blank to use the time when the data are uploaded."),
+      'timeexecuted'    => array('req' => FALSE, 'width' => 10, 'desc' => "Time of analysis execution. Use the format yyyy-mm-dd hh:mm:ss e.g. \"2001-02-03 04:05:06\". Leave blank to use the time when the data are uploaded."),
+      '##property_name' => array('req' => FALSE, 'width' => 10, 'desc' => "Special columns (##) : followed by name (cvterm name) of the property, or cv::name."),
     );
     return $headers;
   }
@@ -90,6 +91,36 @@ class MCL_TEMPLATE_ANALYSIS extends MCL_TEMPLATE {
       'description'     => $line['description'],
       'timeexecuted'    => $line['timeexecuted'],
     );
-    MCL_CHADO_ANALYSIS::addAnalysis($this, $details);
+    $analysis = MCL_CHADO_ANALYSIS::addAnalysis($this, $details);
+    if ($analysis) {
+
+      // Adds the user-specific properties.
+      $this->addSpecialColumns('##', $analysis, $line);
+
+    }
+  }
+
+  /**
+   * @see MCL_TEMPLATE::postProcessECD()
+   */
+  public function postProcessECD() {
+
+    // Lists the job paremters.
+    $cv_name = $this->getJob()->getParamByKey('cv');
+
+    // Gets the cv.
+    $cv = MCL_CHADO_CV::getCV($cv_name, 'SITE_CV');
+    if (!$cv) {
+      $this->updateMsg('E', "cv \"$cv_name\" does not exist.");
+      return FALSE;
+    }
+
+    // Saves the user-specific properties.
+    if (!$this->saveSpecialColumns('##', $cv->getCvID(), $this->getHeaders())) {
+      $this->updateMsg('E', "Failed to save the special columns");
+      return FALSE;
+    }
+
+    return TRUE;
   }
 }
