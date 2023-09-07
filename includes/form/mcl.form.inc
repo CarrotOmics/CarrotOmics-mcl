@@ -16,7 +16,7 @@ function mcl_form($form, &$form_state) {
   $form['#tree'] = TRUE;
 
   // Checks for an user.
-  if (!$user->name) {
+  if (!property_exists($user, 'name') or !$user->name) {
     $form['mcl']['anonymous'] = array(
       '#markup' => '<div>Please log in</div>',
     );
