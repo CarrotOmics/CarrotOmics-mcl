@@ -243,14 +243,14 @@ class MCL_CHADO_TRAIT extends MCL_CHADO_CVTERM {
       $categories = preg_split("/[,;]/", $trait_category, -1, PREG_SPLIT_NO_EMPTY);
       $cv_name = MCL_SITE_VAR::getValueByName('SITE_TRAIT_ONTOLOGY');
       foreach ($categories as $category) {
-        $category = MCL_CHADO_CVTERM::getCvterm($cv_name, $category);
-        if ($category) {
-          if (!$this->addRelationship($mcl_tmpl, 'cvterm_relationship', 'subject_id', $this->cvterm_id, 'object_id', $category->getCvtermID(), $type_id)) {
+        $category_obj = MCL_CHADO_CVTERM::getCvterm($cv_name, $category);
+        if ($category_obj) {
+          if (!$this->addRelationship($mcl_tmpl, 'cvterm_relationship', 'subject_id', $this->cvterm_id, 'object_id', $category_obj->getCvtermID(), $type_id)) {
             $flag = FALSE;
           }
         }
         else {
-          $this->updateMsg($mcl_tmpl, 'E', "Warning trait_category : '$category' not found cvterm");
+          $this->updateMsg($mcl_tmpl, 'E', "Error trait_category \"$category\" not found in SITE_TRAIT_ONTOLOGY \"$cv_name\"");
           $flag = FALSE;
         }
       }
