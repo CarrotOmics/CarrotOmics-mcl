@@ -1125,6 +1125,7 @@ DESC;
    * @param string $id_2
    */
   public function addLink($table_name, $field_1, $id_1, $field_2, $id_2, $type_id = NULL) {
+    $status = FALSE:
     if ($id_1 && $id_2) {
 
       // Checks for a duplication before adding a new relationship.
@@ -1139,6 +1140,7 @@ DESC;
       $obj = $class_name::byKey($args);
       if ($obj) {
         $this->addMsg('D', $table_name, $args);
+        $status = TRUE:
       }
       else {
 
@@ -1146,12 +1148,14 @@ DESC;
         $obj = new $class_name($args);
         if ($obj->insert()) {
           $this->addMsg('N', $table_name, $args);
+          $status = TRUE:
         }
         else {
           $this->addMsg('E', $table_name, $args);
         }
       }
     }
+    return $status;
   }
 
   /**
