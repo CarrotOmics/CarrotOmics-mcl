@@ -254,8 +254,8 @@ class MCL_TEMPLATE_PHENOTYPE extends MCL_TEMPLATE {
         $value  = $line['#' . $name];
 
         // Sets the default value if provided.
-        if (!$value && $descriptor['defaultValue']) {
-          $value = $descriptor['defaultValue'];
+        if (!$value) {
+          $value = $descriptor['defaultValue'] ?? NULL;
         }
 
         // Adds the value.
