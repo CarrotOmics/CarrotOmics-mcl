@@ -976,6 +976,7 @@ class CHADO_TABLE  {
    * @return boolean
    */
   public function addLink(MCL_TEMPLATE $mcl_tmpl = NULL, $table_name, $field_1, $id_1, $field_2, $id_2, $type_id = NULL) {
+    $status = FALSE;
     if ($id_1 != '' && $id_2 != '') {
 
       // Checks for a duplication before adding a new relationship.
@@ -990,6 +991,7 @@ class CHADO_TABLE  {
       $obj = $class_name::byKey($args);
       if ($obj) {
         $this->addMsg($mcl_tmpl, 'D', $table_name, $args);
+        $status = TRUE;
       }
       else {
 
@@ -997,14 +999,14 @@ class CHADO_TABLE  {
         $obj = new $class_name($args);
         if ($obj->insert()) {
           $this->addMsg($mcl_tmpl, 'N', $table_name, $args);
-          return TRUE;
+          $status = TRUE;
         }
         else {
           $this->addMsg($mcl_tmpl, 'E', $table_name, $args);
         }
       }
     }
-    return FALSE;
+    return $status;
   }
 
 
